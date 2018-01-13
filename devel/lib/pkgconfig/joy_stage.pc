@@ -1,0 +1,8 @@
+prefix=/home/ashikari/TSERA/devel
+
+Name: joy_stage
+Description: Description of joy_stage
+Version: 0.0.0
+Cflags: 
+Libs: -L/home/ashikari/TSERA/devel/lib 
+Requires: 
