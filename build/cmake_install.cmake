@@ -118,6 +118,7 @@ if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
   include("/home/ashikari/TSERA/build/gtest/cmake_install.cmake")
   include("/home/ashikari/TSERA/build/joy_stage/cmake_install.cmake")
+  include("/home/ashikari/TSERA/build/kinematics/cmake_install.cmake")
 
 endif()
 

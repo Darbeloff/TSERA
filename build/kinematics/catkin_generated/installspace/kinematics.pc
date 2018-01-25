@@ -1,0 +1,8 @@
+prefix=/home/ashikari/TSERA/install
+
+Name: kinematics
+Description: Description of kinematics
+Version: 0.0.0
+Cflags: 
+Libs: -L/home/ashikari/TSERA/install/lib 
+Requires: 

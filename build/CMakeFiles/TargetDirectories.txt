@@ -41,3 +41,10 @@
 /home/ashikari/TSERA/build/joy_stage/CMakeFiles/std_msgs_generate_messages_nodejs.dir
 /home/ashikari/TSERA/build/joy_stage/CMakeFiles/roscpp_generate_messages_nodejs.dir
 /home/ashikari/TSERA/build/joy_stage/CMakeFiles/std_msgs_generate_messages_py.dir
+/home/ashikari/TSERA/build/kinematics/CMakeFiles/install.dir
+/home/ashikari/TSERA/build/kinematics/CMakeFiles/edit_cache.dir
+/home/ashikari/TSERA/build/kinematics/CMakeFiles/install/strip.dir
+/home/ashikari/TSERA/build/kinematics/CMakeFiles/list_install_components.dir
+/home/ashikari/TSERA/build/kinematics/CMakeFiles/test.dir
+/home/ashikari/TSERA/build/kinematics/CMakeFiles/install/local.dir
+/home/ashikari/TSERA/build/kinematics/CMakeFiles/rebuild_cache.dir

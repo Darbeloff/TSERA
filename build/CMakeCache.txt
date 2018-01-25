@@ -283,6 +283,12 @@ joy_stage_BINARY_DIR:STATIC=/home/ashikari/TSERA/build/joy_stage
 //Value Computed by CMake
 joy_stage_SOURCE_DIR:STATIC=/home/ashikari/TSERA/src/joy_stage
 
+//Value Computed by CMake
+kinematics_BINARY_DIR:STATIC=/home/ashikari/TSERA/build/kinematics
+
+//Value Computed by CMake
+kinematics_SOURCE_DIR:STATIC=/home/ashikari/TSERA/src/kinematics
+
 //Path to a library.
 lib:FILEPATH=/opt/ros/kinetic/lib/libxmlrpcpp.so
 
@@ -418,7 +424,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_NM
 CMAKE_NM-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=3
+CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=4
 //ADVANCED property for variable: CMAKE_OBJCOPY
 CMAKE_OBJCOPY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_OBJDUMP

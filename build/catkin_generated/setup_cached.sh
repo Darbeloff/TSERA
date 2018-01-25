@@ -8,7 +8,6 @@
 
 # modified environment variables
 export CMAKE_PREFIX_PATH="/home/ashikari/TSERA/devel:$CMAKE_PREFIX_PATH"
-export LD_LIBRARY_PATH="/home/ashikari/TSERA/devel/lib:$LD_LIBRARY_PATH"
 export PWD="/home/ashikari/TSERA/build"
-export ROSLISP_PACKAGE_DIRECTORIES="/home/ashikari/TSERA/devel/share/common-lisp:$ROSLISP_PACKAGE_DIRECTORIES"
+export ROSLISP_PACKAGE_DIRECTORIES="/home/ashikari/TSERA/devel/share/common-lisp"
 export ROS_PACKAGE_PATH="/home/ashikari/TSERA/src:$ROS_PACKAGE_PATH"

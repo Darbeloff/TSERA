@@ -815,6 +815,24 @@ clean: joy_stage/CMakeFiles/std_msgs_generate_messages_py.dir/clean
 .PHONY : clean
 
 #=============================================================================
+# Directory level rules for directory kinematics
+
+# Convenience name for "all" pass in the directory.
+kinematics/all:
+
+.PHONY : kinematics/all
+
+# Convenience name for "clean" pass in the directory.
+kinematics/clean:
+
+.PHONY : kinematics/clean
+
+# Convenience name for "preinstall" pass in the directory.
+kinematics/preinstall:
+
+.PHONY : kinematics/preinstall
+
+#=============================================================================
 # Special targets to cleanup operation of make.
 
 # Special rule to run CMake to check the build system integrity.
