@@ -1,2 +1,0 @@
-joy_stage:kinematics
--DCATKIN_DEVEL_PREFIX=/home/ashikari/TSERA/devel -DCMAKE_INSTALL_PREFIX=/home/ashikari/TSERA/install -G Unix Makefiles
