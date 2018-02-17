@@ -69,6 +69,7 @@ void clearEncoderCounts() {
   clearEncoderCount(slaveSelectEnc4);
 }
 
+
 long readEncoder(int encoder) {
   
   int encoderName = 0;
