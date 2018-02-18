@@ -78,7 +78,7 @@ private:
 
 
 //Constants
-const int MAX_PWM = 255;
-const int MIN_PWM = 0;
+const int MAX_PWM = 1000;
+const int MIN_PWM = -1000;
 
 #endif

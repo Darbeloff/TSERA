@@ -39,11 +39,12 @@ void motorClass::calc_t(){
 
 float motorClass::motor_velocity_calc(void){
   calc_t();
-  MotorVel = (encodercount-encodercountPrev) * dt;
+  MotorVel = (encodercount-encodercountPrev) / dt;
   storeOldVals();
   return MotorVel; 
 }
 
+////////////velocity controller functions!\\\\\\\\\\\\\\\\\
 
 float motorClass::vel_proportional_control(void){
   errorVel = desiredMotorVel - MotorVel;
@@ -79,9 +80,11 @@ float motorClass::vel_integral_control(void){
 
 
 int motorClass::vel_closedLoopController(void){
+  motor_velocity_calc();
+
   currentCommandv = vel_proportional_control() + vel_derivative_control() + vel_integral_control();
 
-  currentCommandv = map(desiredMotorVel, -100, 100, -255, 255);
+  currentCommandv = map(desiredMotorVel, -1000, 1000, -255, 255);
   if (currentCommandv < -0.001) {
     digitalWrite(_dirPin, LOW);
   }
