@@ -70,18 +70,7 @@ void clearEncoderCounts() {
 }
 
 
-long readEncoder(int encoder) {
-  
-  int encoderName = 0;
-  if(encoder == 1){
-    encoderName = slaveSelectEnc1;
-   }else if(encoder == 2){
-      encoderName = slaveSelectEnc2;
-   }else if(encoder == 3){
-    encoderName = slaveSelectEnc3;
-   }else if(encoder ==4){
-    encoderName = slaveSelectEnc4;
-   }
+long readEncoder(int encoderName) {
 
   SPI.beginTransaction(SPISettings(10000000, MSBFIRST, SPI_MODE0));
   // Initialize temporary variables for SPI read
