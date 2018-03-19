@@ -20,7 +20,5 @@ def joy_cmd():
 	rospy.spin()
 
 
-
-
 if __name__ == '__main__':
 	joy_cmd()

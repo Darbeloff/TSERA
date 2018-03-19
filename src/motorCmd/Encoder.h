@@ -1,3 +1,4 @@
+#include <SPI.h>
 
 // Slave Select pins for encoders 1, 2 and 3
 // Feel free to reallocate these pins to best suit your circuit
@@ -10,7 +11,7 @@ const int slaveSelectEnc4 = 51;
 
 void initEncoder(int encoderName){
   // Set slave selects as outputs
-
+  SPI.begin();
   
   pinMode(encoderName, OUTPUT);
 

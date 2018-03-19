@@ -1,10 +1,9 @@
 #include "Arduino.h"
 #include "motorClass.h"
-#include <SPI.h>
 #include "Encoder.h"
 
 
-
+//Constructor
 motorClass::motorClass(int pwmPin,int dirPin, int limitPin, int encPin){
   _pwmPin = pwmPin;
   _dirPin = dirPin;
@@ -28,6 +27,8 @@ void motorClass::setMotorPos(float pos){
   desiredMotorPos = pos;
 }
 
+
+//return limit
 int motorClass::getLimit(){
   return _limitPin;
   }
@@ -47,15 +48,17 @@ signed long motorClass::readEnc(void){
 ////////////////////////////////MISC\\\\\\\\\\\\\\\\\\\\\\\\
 
 void motorClass::storeOldVals(void){
+  calc_t();
   prevTime = currentTime;
   errorVelPrev = errorVel;
   encodercountPrev = encodercount;
+  errorPosPrev = errorPos;
 }
 
 
 void motorClass::calc_t(){
-  currentTime = millis();
-  dt = currentTime - prevTime;
+  currentTime = micros();
+  dt = (currentTime - prevTime)/1000000.0;
 }
 
 
@@ -64,13 +67,14 @@ void motorClass::calc_t(){
 
 float motorClass::motor_position_calc(void){
   calc_t();
-  MotorPos = 1000*(gearRatio/encCntsRev)*(encodercount);
+  encodercount = readEnc();
+  MotorPos = (1/gearRatio)*(1/encCntsRev)*(encodercount); //revolutions of the output shaft
   storeOldVals();
   return MotorPos; 
 }
 
 float motorClass::pos_proportional_control(void){
-  errorPos = desiredMotorPos - MotorPos;
+  //errorPos = desiredMotorPos - MotorPos;
   pCommandp = Kpp * errorPos;
   return pCommandp;
 }
@@ -85,34 +89,28 @@ float motorClass::pos_derivative_control(void){
 
 float motorClass::pos_integral_control(void){
   calc_t();
-  integratedPosError = integratedPosError + errorPos*dt;
-  
+  integratedPosError = integratedPosError + errorPos;
   iCommandp = Kip*integratedPosError;
-
-  //deal with integral windup
-  if ( iCommandp > MAX_PWM ){
-    iCommandp = MAX_PWM;
-    integratedPosError = 0; //subject to change
-  }
-  else if ( iCommandp < MIN_PWM ){
-    iCommandp = MIN_PWM;
-    integratedPosError = 0;
-  }
   return iCommandp;
 }
 
 
 int motorClass::pos_closedLoopController(void){
   motor_position_calc();
-
+  errorPos = desiredMotorPos - MotorPos;
+  if (abs(errorPos)<0.005){
+    errorPos = 0;
+    }
+  
   currentCommandp = pos_proportional_control() + pos_derivative_control() + pos_integral_control();
 
-  currentCommandp = map(desiredMotorPos, -1000, 1000, -255, 255);
+  currentCommandp = constrain(map(currentCommandp, -1000, 1000, -255, 255),-255,255);
+
   if (currentCommandp < -0.001) {
-    digitalWrite(_dirPin, LOW);
+    digitalWrite(_dirPin, HIGH);
   }
   else if(currentCommandp > 0.001){
-    digitalWrite(_dirPin, HIGH);
+    digitalWrite(_dirPin, LOW);
   }
   analogWrite(_pwmPin, abs(currentCommandp));
   return currentCommandp; 
@@ -123,7 +121,8 @@ int motorClass::pos_closedLoopController(void){
 
 float motorClass::motor_velocity_calc(void){
   calc_t();
-  MotorVel = 1000*(gearRatio/encCntsRev)*(encodercount-encodercountPrev) / dt;
+  encodercount = readEnc();
+  MotorVel = (1/gearRatio)*(1/encCntsRev)*(encodercount-encodercountPrev)/dt;//motor shaft revolutions per second
   storeOldVals();
   return MotorVel; 
 }
@@ -145,36 +144,45 @@ float motorClass::vel_derivative_control(void){
 
 float motorClass::vel_integral_control(void){
   calc_t();
-  integratedVelError = integratedVelError + errorVel*dt;
+  errorVel = desiredMotorVel - MotorVel;
+  integratedVelError = integratedVelError + errorVel;
   
   iCommandv = Kiv*integratedVelError;
-
-  //deal with integral windup
-  if ( iCommandv > MAX_PWM ){
-    iCommandv = MAX_PWM;
-    integratedVelError = 0; //subject to change
-  }
-  else if ( iCommandv < MIN_PWM ){
-    iCommandv = MIN_PWM;
-    integratedVelError = 0;
-  }
   return iCommandv;
+}
+
+
+void motorClass::stopMotor(void){
+  analogWrite(_pwmPin,0);
 }
 
 
 int motorClass::vel_closedLoopController(void){
   motor_velocity_calc();
 
-  currentCommandv = vel_proportional_control() + vel_derivative_control() + vel_integral_control();
+  float Pv=vel_proportional_control();
+  float Dv=vel_derivative_control();
+  float Iv=vel_integral_control();
 
-  currentCommandv = map(desiredMotorVel, -1000, 1000, -255, 255);
+  currentCommandv = Pv+Iv+Dv;
+
+  currentCommandv = constrain(map(currentCommandv, -1000, 1000, -255, 255),-255,255);
   if (currentCommandv < -0.001) {
-    digitalWrite(_dirPin, LOW);
-  }
-  else if(currentCommandv > 0.001){
     digitalWrite(_dirPin, HIGH);
   }
-  analogWrite(_pwmPin, abs(currentCommandv));
+  else if(currentCommandv > 0.001){
+    digitalWrite(_dirPin, LOW);
+  }
+  analogWrite(_pwmPin,abs(currentCommandv));
   return currentCommandv; 
+}
+
+void motorClass::logValues(void) {
+  Serial.print(" MP: "+(String)MotorPos);
+  Serial.print(" ErrorPos: "+ (String)errorPos);
+  Serial.print(" dt: "+ (String)(1000*dt));
+  Serial.print(" integrated Error: "+ (String)(1000*integratedPosError));
+  Serial.println(" MotorCommand: " + (String)currentCommandp);
+
 }
 

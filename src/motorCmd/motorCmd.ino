@@ -1,71 +1,84 @@
+#include "motorClass.h"
+#include "calibration.h"
+
+#include <ros.h>
+#include <std_msgs/Float32MultiArray.h>
 
 
-//#include "motorClass.h"
-#include <SPI.h>
-#include "Encoder.h"
-//#include "ros.h"
 
+//instantiate motors!
 
+//stage 1
+motorClass m1a =  motorClass(8,33,44,49);
+motorClass m1b =  motorClass(9,32,48,45);
+motorClass m1c =  motorClass(11,30,46,47);
 
-//void calibrate(motorClass m1,motorClass m2,motorClass m3){
-//  float spd = 0.1;
-//  while(digitalRead(m1.getLimit()) || digitalRead(m2.getLimit()) || digitalRead(m3.getLimit()) ){
-//    
-//    if( digitalRead(m1.getLimit()) ){m1.setMotorVel(spd);}
-//    else{
-//      m1.setMotorVel(0);
-//      m1.clearEncoder();
-//      }
-//    if( digitalRead(m2.getLimit()) ){m2.setMotorVel(spd);}
-//    else{
-//      m2.setMotorVel(0);
-//      m2.clearEncoder();
-//    }
-//    if( digitalRead(m3.getLimit()) ){m3.setMotorVel(spd);}
-//    else{
-//      m3.setMotorVel(0);
-//      m3.clearEncoder();
-//    }
+//stage 2
+motorClass m2a =  motorClass(7,34,38,41);
+motorClass m2b =  motorClass(6,35,42,39);
+motorClass m2c =  motorClass(4,37,40,43);
 
+//stage 3
+motorClass m3a =  motorClass(2,29,22,25); //1-1
+motorClass m3b =  motorClass(3,28,24,23); //1-2
+motorClass m3c =  motorClass(10,31,26,27); //2-1
 
-    //m1.vel_closedLoopController();
-    //m2.vel_closedLoopController();
-    //m3.vel_closedLoopController();
-    //}
+void command_callback(const std_msgs::Float32MultiArray& posSetpoint){
+  m1a.setMotorPos(posSetpoint.data[0]);
+  m1b.setMotorPos(posSetpoint.data[1]);
+  m1c.setMotorPos(posSetpoint.data[2]);
 
-    
+  m1a.setMotorPos(posSetpoint.data[3]);
+  m1b.setMotorPos(posSetpoint.data[4]);
+  m1c.setMotorPos(posSetpoint.data[5]);
+
   
-  //}
+  m3a.setMotorPos(posSetpoint.data[6]);
+  m3b.setMotorPos(posSetpoint.data[7]);
+  m3c.setMotorPos(posSetpoint.data[8]);
+}
 
-  //stage 1
-  //motorClass m1a =  motorClass(7,6,46,49);
-  //motorClass m1b =  motorClass(1,2,3,45);
-  //motorClass m1c =  motorClass(1,2,3,47);
 
-  //stage 2
-  //motorClass m2a =  motorClass(1,2,3,41);
-  //motorClass m2b =  motorClass(1,2,3,39);
-  //motorClass m2c =  motorClass(1,2,3,43);
 
-  //stage 3
-  //motorClass m3a =  motorClass(1,2,3,25);
-  //motorClass m3b =  motorClass(1,2,3,23);
-  //motorClass m3c =  motorClass(1,2,3,27);
+//ros
+ros::NodeHandle ArduinoInterface;
+std_msgs::Float32MultiArray outputVelocity;
+
+ros::Subscriber<std_msgs::Float32MultiArray> velSub("ik", &command_callback);
+
+
 
 void setup () {
-  Serial.begin(9600);
-    //calibrate(m1a,m1b,m1c);
-    //calibrate(m2a,m2b,m2c);
-    //calibrate(m3a,m3b,m3c);
 
-  initEncoder(49);
+  delay(1000);
+
+
+  //initialize ros
+  ArduinoInterface.initNode();
+
+  //subscribe
+  ArduinoInterface.subscribe(velSub);
+
+
 }
 
 
 void loop (){
-  //Serial.println(m3a.readEnc());
-  Serial.println("helo");
-}
+  
+  m3a.pos_closedLoopController();
+  m3b.pos_closedLoopController();
+  m3c.pos_closedLoopController();
+
+
+  
+  ArduinoInterface.spinOnce();
+  
+  }
+
+
+
+
+
 
 
 

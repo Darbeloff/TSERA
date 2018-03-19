@@ -42,6 +42,11 @@ def width(L):
 	alpha = np.arcsin(L/le)
 	w = 2 * lp * np.cos(alpha + beta)
 
+
+
+	#convert to rotations of the motor shaft
+	w = (30 -  w/2)*.7874
+
 	return w
 
 

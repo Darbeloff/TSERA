@@ -12,6 +12,9 @@ public:
     signed long readEnc(void);
     int vel_closedLoopController(void);
     int pos_closedLoopController(void);
+    void logValues(void);
+    void stopMotor(void);
+    float errorPos = 0;
 
 private:
     //pins
@@ -46,11 +49,11 @@ private:
     float pCommandv = 0;
     float dCommandv = 0;
     float iCommandv = 0;
-    int currentCommandv = 0;
+    float currentCommandv = 0;
 
 
     //error pos
-    float errorPos = 0;
+
     float errorPosPrev = 0;
     float integratedPosError = 0;
 
@@ -58,26 +61,25 @@ private:
     float pCommandp = 0;
     float dCommandp = 0;
     float iCommandp = 0;
-    int currentCommandp = 0;
+    float currentCommandp = 0;
     
     //Position Setpoint and state
     float MotorPos;
     float desiredMotorPos = 0;
 
     //velocity controller gains
-    float Kpp = 1;
-    float Kdp = 0;
-    float Kip = 0;
+    float Kpp = 5000.0;
+    float Kdp = 0.0;
+    float Kip = 0;//100000;
     
     //Velocity Setpoint and state
-    float MotorVel;
+    float MotorVel = 0;
     float desiredMotorVel = 0;
-    float avgMotorVel;
 
     //velocity controller gains
-    float Kpv = 1;
+    float Kpv = 2000;
     float Kdv = 0;
-    float Kiv = 0;
+    float Kiv = 10;
 
     //velocity controller functions
     float vel_proportional_control(void);
@@ -97,10 +99,10 @@ private:
 
 
 //Constants
-const int MAX_PWM = 1000;
-const int MIN_PWM = -1000;
+const float MAX_PWM = 1000;
+const float MIN_PWM = -1000;
 
-const float gearRatio = 298.0;
-const float encCntsRev = 12.0;
+const float gearRatio = 166.0;
+const float encCntsRev = 16.0*4;
 
 #endif
