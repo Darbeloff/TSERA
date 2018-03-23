@@ -4,8 +4,6 @@
 #include <ros.h>
 #include <std_msgs/Float32MultiArray.h>
 
-
-
 //instantiate motors!
 
 //stage 1
@@ -28,9 +26,9 @@ void command_callback(const std_msgs::Float32MultiArray& posSetpoint){
   m1b.setMotorPos(posSetpoint.data[1]);
   m1c.setMotorPos(posSetpoint.data[2]);
 
-  m1a.setMotorPos(posSetpoint.data[3]);
-  m1b.setMotorPos(posSetpoint.data[4]);
-  m1c.setMotorPos(posSetpoint.data[5]);
+  m2a.setMotorPos(posSetpoint.data[3]);
+  m2b.setMotorPos(posSetpoint.data[4]);
+  m2c.setMotorPos(posSetpoint.data[5]);
 
   
   m3a.setMotorPos(posSetpoint.data[6]);
@@ -39,8 +37,7 @@ void command_callback(const std_msgs::Float32MultiArray& posSetpoint){
 }
 
 
-
-//ros
+////ros
 ros::NodeHandle ArduinoInterface;
 std_msgs::Float32MultiArray outputVelocity;
 
@@ -51,7 +48,7 @@ ros::Subscriber<std_msgs::Float32MultiArray> velSub("ik", &command_callback);
 void setup () {
 
   delay(1000);
-
+  //Serial.begin(9600);
 
   //initialize ros
   ArduinoInterface.initNode();
@@ -59,16 +56,27 @@ void setup () {
   //subscribe
   ArduinoInterface.subscribe(velSub);
 
-
 }
 
 
 void loop (){
-  
+
   m3a.pos_closedLoopController();
   m3b.pos_closedLoopController();
   m3c.pos_closedLoopController();
 
+  m2a.pos_closedLoopController();
+  m2b.pos_closedLoopController();
+  m2c.pos_closedLoopController();
+  
+
+  m1a.pos_closedLoopController();
+  m1b.pos_closedLoopController();
+  m1c.pos_closedLoopController();
+
+
+
+  //m1b.logValues();
 
   
   ArduinoInterface.spinOnce();

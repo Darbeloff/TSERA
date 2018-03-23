@@ -7,6 +7,9 @@ from ik_helper import *
 
 ik_pub = rospy.Publisher('/ik',Float32MultiArray,queue_size = 1)
 
+
+command = [0]*9;
+
 def ik_cb(msg):
 	#p = np.matrix( [ msg.data[0]; msg.data[1]; msg.data[2] ] )
 	stage = int(msg.data[0])
@@ -15,8 +18,10 @@ def ik_cb(msg):
 	z = msg.data[3]
 
 	width_sps = ik_legs(x,y,z)
-
-	command = [0]*9;
+	print x,y,z
+	print width_sps
+	
+	
 	stage_index1 = 3*(stage-1)
 	stage_index2 = stage_index1+3
 
@@ -35,5 +40,6 @@ def ik():
 
 if __name__ == '__main__':
 	ik()
+	
 
 

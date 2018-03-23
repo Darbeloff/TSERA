@@ -107,10 +107,10 @@ int motorClass::pos_closedLoopController(void){
   currentCommandp = constrain(map(currentCommandp, -1000, 1000, -255, 255),-255,255);
 
   if (currentCommandp < -0.001) {
-    digitalWrite(_dirPin, HIGH);
+    digitalWrite(_dirPin, LOW);
   }
   else if(currentCommandp > 0.001){
-    digitalWrite(_dirPin, LOW);
+    digitalWrite(_dirPin, HIGH);
   }
   analogWrite(_pwmPin, abs(currentCommandp));
   return currentCommandp; 

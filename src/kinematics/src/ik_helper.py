@@ -26,14 +26,27 @@ def lc(x, y, z, Lt, s0, r, M, k):
 	return lc
 
 
+rot_min = 0;
+rot_max = 27.47/2*0.7874 # garbage value
+
+def constrain_leg_width(rotations):
+	if rotations >= rot_max:
+		return rot_max
+	elif rotations<=rot_min:
+		return rot_min
+	else:
+		return rotations
+
+
+
+
+phi = 99.59/180*np.pi  #the angle of the corner between the scissor standoff and the imaginary length le 
+l0 = 30
+sciss_length_0 = 30 + 42.5  + 85 + 42.5
+sciss_length_1 = 42.5  + 85 + 42.5 # sum of all scissor lengths (minus offset)
+lb = 4 # length of offset
 
 def width(L):
-	phi = 99.59/180*np.pi  #the angle of the corner between the scissor standoff and the imaginary length le 
-	l0 = 30
-	sciss_length_0 = 30 + 42.5  + 85 + 42.5
-	sciss_length_1 = 42.5  + 85 + 42.5 # sum of all scissor lengths (minus offset)
-	lb = 4 # length of offset
-
 
 	lp = np.sqrt( l0**2 + lb**2 - 2*l0*lb* np.cos(phi) )
 	le = np.sqrt( sciss_length_0**2 + lb**2 - 2* sciss_length_0*lb*np.cos(phi) )
@@ -42,12 +55,13 @@ def width(L):
 	alpha = np.arcsin(L/le)
 	w = 2 * lp * np.cos(alpha + beta)
 
-
-
 	#convert to rotations of the motor shaft
-	w = (30 -  w/2)*.7874
+	w = (50 -  w)*.7874/2
+	
 
-	return w
+
+	return constrain_leg_width(w)
+
 
 
 
@@ -57,17 +71,25 @@ def ik_legs(x,y,z):
 	calculates required leg lengths
 
 	'''
-	Lt = 57.57 #mm
+	Lt = 57.57 #mm fill in new values with scherical joint
 	s0 = 33.23 #mm
 
 	r = np.sqrt(x**2 + y**2)
-	k = np.sqrt(-3*y**2 + (np.sqrt(3)*Lt + 3*x)*(-x + r))
-	M = np.sqrt(2*(r - x)*(np.sqrt(3)*Lt + 3*x) - 6*y**2)
+
 
 
 	la_L = la( x,y, z, Lt, s0, r)
-	lb_L = lb(x, y, z, Lt, s0, r, M, k)
-	lc_L = lc(x, y, z, Lt, s0, r, M, k)
+
+	#Avoid singularity
+	if(x!=0.0 and y!=0.0):
+		k = np.sqrt(-3*y**2 + (np.sqrt(3)*Lt + 3*x)*(-x + r))
+		M = np.sqrt(2*(r - x)*(np.sqrt(3)*Lt + 3*x) - 6*y**2)
+
+		lb_L = lb(x, y, z, Lt, s0, r, M, k)
+		lc_L = lc(x, y, z, Lt, s0, r, M, k)
+	else:
+		lb_L = la_L
+		lc_L = la_L
 
 
 	legs = [width(la_L), width(lb_L), width(lc_L)]
@@ -75,6 +97,5 @@ def ik_legs(x,y,z):
 
 
 if __name__ == '__main__':
-	print ik_legs( -3.14, -1.62, 118.29)
-
-
+	1==1#do nothing
+	
