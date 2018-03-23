@@ -16,6 +16,8 @@ inc = 2*np.pi/150
 amp = 4.5
 
 def js_traj_cb(msg):
+
+
 	if (msg.buttons[0] == 1): # trigger start
 		amp = 4.5
 
@@ -75,6 +77,25 @@ def js_traj_cb(msg):
 
 		print "Sin Trajectory Completed\n"
 		rospy.sleep(100)
+
+
+	elif msg.buttons[4]==1:
+		print "Extend Trajectory Start"
+
+		#all stages
+		for j in np.arange(0,3):
+			stageStart  = 3*j
+			stageEnd = stageStart + 3
+			for i in np.arange(0,3*(2*np.pi)+inc,inc):
+				stage_command = [10.5,10.5,10.5]
+				js_cmd[stageStart:stageEnd] = stage_command
+				js_cmd_msg = Float32MultiArray(data = js_cmd ) #stage , x, y, z
+				js_traj_pub.publish(js_cmd_msg)
+				rospy.sleep(0.09)
+			rospy.sleep(7)
+
+		print "Extend Trajectory End"
+
 
 def js_traj_cmd():
 	print 'Joint Space Trajectory command initialized...'
