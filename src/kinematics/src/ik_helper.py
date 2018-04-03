@@ -75,9 +75,6 @@ def ik_legs(x,y,z):
 	s0 = 33.23 #mm
 
 	r = np.sqrt(x**2 + y**2)
-
-
-
 	la_L = la( x,y, z, Lt, s0, r)
 
 	#Avoid singularity

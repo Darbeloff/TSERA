@@ -29,16 +29,16 @@ void calibrate(motorClass m1,motorClass m2,motorClass m3){
       m3.stopMotor();
     }
 
-
-    Serial.print(digitalRead(m1.getLimit()));
-    Serial.print(digitalRead(m2.getLimit()));
-    Serial.println(digitalRead(m3.getLimit()));
+//
+//    Serial.print(digitalRead(m1.getLimit()));
+//    Serial.print(digitalRead(m2.getLimit()));
+//    Serial.println(digitalRead(m3.getLimit()));
 
   }
   
-  Serial.print(digitalRead(m1.getLimit()));
-  Serial.print(digitalRead(m2.getLimit()));
-  Serial.println(digitalRead(m3.getLimit()));
+//  Serial.print(digitalRead(m1.getLimit()));
+//  Serial.print(digitalRead(m2.getLimit()));
+//  Serial.println(digitalRead(m3.getLimit()));
 
   m1.stopMotor();
   m1.clearEncoder();

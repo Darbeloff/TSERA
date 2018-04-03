@@ -19,7 +19,7 @@ def js_traj_cb(msg):
 
 
 	if (msg.buttons[0] == 1): # trigger start
-		amp = 4.5
+		amp = 5
 
 		print "Sine Trajectory Start"
 
@@ -58,16 +58,16 @@ def js_traj_cb(msg):
 
 		rospy.sleep(15)
 
-		#stage 1
-		amp = 4.5
-		for i in np.arange(0,3*(2*np.pi)+inc,inc):
-			stage_command = [5.0+amp*np.sin(i),5.0+amp*np.sin(i+2*np.pi/3.0),5.0+amp*np.sin(i-2*(np.pi)/3.0) ]
-			js_cmd[0:3] = stage_command
-			js_cmd_msg = Float32MultiArray(data = js_cmd ) #stage , x, y, z
-			js_traj_pub.publish(js_cmd_msg)
-			rospy.sleep(0.09)
+		# #stage 1
+		# amp = 4.5
+		# for i in np.arange(0,3*(2*np.pi)+inc,inc):
+		# 	stage_command = [5.0+amp*np.sin(i),5.0+amp*np.sin(i+2*np.pi/3.0),5.0+amp*np.sin(i-2*(np.pi)/3.0) ]
+		# 	js_cmd[0:3] = stage_command
+		# 	js_cmd_msg = Float32MultiArray(data = js_cmd ) #stage , x, y, z
+		# 	js_traj_pub.publish(js_cmd_msg)
+		# 	rospy.sleep(0.09)
 
-		rospy.sleep(5)
+		# rospy.sleep(5)
 
 		stage_command = [0,0,0]
 		js_cmd[0:3] = stage_command
