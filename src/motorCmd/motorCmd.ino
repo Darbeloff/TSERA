@@ -67,8 +67,6 @@ ros::Subscriber<std_msgs::Float32MultiArray> velSub("ik", &command_callback);
 
 void setup () {
 
-  delay(1000);
-
   //initialize ros
   ArduinoInterface.initNode();
 

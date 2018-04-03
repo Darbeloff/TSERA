@@ -11,8 +11,10 @@ master_pub = rospy.Publisher('/master', String ,queue_size = 1 )
 def  masterJoy_cb(msg):
 	if msg.buttons[0] == 1:
 		master_pub.publish('first')
-	if msg.buttons[1] == 1:
+	elif msg.buttons[1] == 1:
 		master_pub.publish('second')
+	elif msg.buttons[2] ==1:
+		master_pub.publish('third')
 
 
 def masterCmd():

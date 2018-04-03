@@ -68,7 +68,7 @@ private:
     float desiredMotorPos = 0;
 
     //velocity controller gains
-    float Kpp = 5000.0;
+    float Kpp = 5500.0;
     float Kdp = 0.0;
     float Kip = 0;//100000;
     
