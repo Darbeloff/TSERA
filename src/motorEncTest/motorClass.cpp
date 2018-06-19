@@ -101,9 +101,9 @@ float motorClass::pos_integral_control(void){
 int motorClass::pos_closedLoopController(void){
   motor_position_calc();
   errorPos = desiredMotorPos - MotorPos;
-  if (abs(errorPos)<0.005){
-    errorPos = 0;
-    }
+//  if (abs(errorPos)<0.005){
+//    errorPos = 0;
+//    }
   
   currentCommandp = pos_proportional_control() + pos_derivative_control() + pos_integral_control();
 
@@ -183,8 +183,8 @@ int motorClass::vel_closedLoopController(void){
 void motorClass::logValues(void) {
   Serial.print(" MP: "+(String)MotorPos);
   Serial.print(" ErrorPos: "+ (String)errorPos);
-  Serial.print(" dt: "+ (String)(1000*dt));
-  Serial.print(" integrated Error: "+ (String)(1000*integratedPosError));
+  Serial.print(" integrated Error: "+ (String)(integratedPosError));
+  Serial.print(" integrated CMD: "+ (String)(iCommandp));
   Serial.println(" MotorCommand: " + (String)currentCommandp);
 
 }

@@ -15,7 +15,8 @@ public:
     void logValues(void);
     void stopMotor(void);
     float errorPos = 0;
-    void pos_on_off_controller(void);
+    float motor_velocity_calc(void);
+    float motor_position_calc(void);
 
 private:
     //pins
@@ -33,13 +34,13 @@ private:
 
     //upkeep functions
     void storeOldVals(void);
-    float motor_velocity_calc(void);
-    float motor_position_calc(void);
     void calc_t(void);
 
     //Encoder
     signed long encodercount = 0;
     signed long encodercountPrev = 0;
+
+
 
     //error vel
     float errorVel = 0;
@@ -68,8 +69,8 @@ private:
     float MotorPos;
     float desiredMotorPos = 0;
 
-    //Position controller gains
-    float Kpp = 5000.0;
+    //velocity controller gains
+    float Kpp = 5500.0;
     float Kdp = 0.0;
     float Kip = 0;//100000;
     
@@ -80,7 +81,7 @@ private:
     //velocity controller gains
     float Kpv = 2000;
     float Kdv = 0;
-    float Kiv = 10;
+    float Kiv = 0;
 
     //velocity controller functions
     float vel_proportional_control(void);
