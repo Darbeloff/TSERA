@@ -60,7 +60,7 @@ std_msgs::Float32 squareError_msg1;
 //std_msgs::Float32 squareError_msg3;
 
 //create publisher
-ros::Publisher squareErrorPub1("squareError1", &squareError_msg1);
+//ros::Publisher squareErrorPub1("squareError1", &squareError_msg1);
 //ros::Publisher squareErrorPub2("squareError2", &squareError_msg2);
 //ros::Publisher squareErrorPub3("squareError3", &squareError_msg3);
 
@@ -76,35 +76,49 @@ void setup () {
     
 
     //publisher
-    ArduinoInterface.advertise(squareErrorPub1);
+    //ArduinoInterface.advertise(squareErrorPub1);
 
     
     //subscriber
     ArduinoInterface.subscribe(velSub);
     delay(1000);
   }
-  else{Serial.begin(9600);}
+  else{Serial.begin(9600);
+  m3a.setMotorPos(0);
+  }
 
 }
 
 
 void loop (){
 
-    m3a.pos_closedLoopController();
-    m3b.pos_closedLoopController();
-    m3c.pos_closedLoopController();
-  
-    m2a.pos_closedLoopController();
-    m2b.pos_closedLoopController();
-    m2c.pos_closedLoopController();
-    
-    m1a.pos_closedLoopController();
-    m1b.pos_closedLoopController();
-    m1c.pos_closedLoopController();
+      m3a.pos_on_off_controller();
+      m3b.pos_on_off_controller();
+      m3c.pos_on_off_controller();
 
-    squareError[0] = pow(m1a.errorPos,2)+ pow(m1b.errorPos,2)+ pow(m1c.errorPos,2);
-    squareError[1] = pow(m2a.errorPos,2)+ pow(m2b.errorPos,2)+ pow(m2c.errorPos,2);
-    squareError[2] = pow(m3a.errorPos,2)+ pow(m3b.errorPos,2)+ pow(m3c.errorPos,2);
+      m2a.pos_on_off_controller();
+      m2b.pos_on_off_controller();
+      m2c.pos_on_off_controller();
+
+      m1a.pos_on_off_controller();
+      m1b.pos_on_off_controller();
+      m1c.pos_on_off_controller();
+      
+//    m3a.pos_closedLoopController();
+//    m3b.pos_closedLoopController();
+//    m3c.pos_closedLoopController();
+  
+//    m2a.pos_closedLoopController();
+//    m2b.pos_closedLoopController();
+//    m2c.pos_closedLoopController();
+    
+//    m1a.pos_closedLoopController();
+//    m1b.pos_closedLoopController();
+//    m1c.pos_closedLoopController();
+
+//    squareError[0] = pow(m1a.errorPos,2)+ pow(m1b.errorPos,2)+ pow(m1c.errorPos,2);
+//    squareError[1] = pow(m2a.errorPos,2)+ pow(m2b.errorPos,2)+ pow(m2c.errorPos,2);
+//    squareError[2] = pow(m3a.errorPos,2)+ pow(m3b.errorPos,2)+ pow(m3c.errorPos,2);
     
 
     
@@ -113,17 +127,13 @@ void loop (){
       //squareError_msg2.data = squareError[1];
       //squareError_msg3.data = 1; //squareError[2];
       
-      squareErrorPub1.publish( &squareError_msg1 );
+      //squareErrorPub1.publish( &squareError_msg1 );
       //squareErrorPub2.publish( &squareError_msg2 );
       //squareErrorPub3.publish( &squareError_msg3 );
       ArduinoInterface.spinOnce();
     }
     else{
-      Serial.print(squareError[0]);
-      Serial.print(" ");
-      Serial.print(squareError[1]);
-      Serial.print(" ");
-      Serial.println(squareError[2]);
+    m3a.log_on_off();
     }
   }
 

@@ -16,6 +16,7 @@ public:
     void stopMotor(void);
     float errorPos = 0;
     void pos_on_off_controller(void);
+    void log_on_off(void);
 
 private:
     //pins
@@ -54,7 +55,6 @@ private:
 
 
     //error pos
-
     float errorPosPrev = 0;
     float integratedPosError = 0;
 
@@ -87,14 +87,11 @@ private:
     float vel_derivative_control(void);
     float vel_integral_control(void);
 
-
-
-
     //position controller functions
     float pos_proportional_control(void);
     float pos_derivative_control(void);
     float pos_integral_control(void);
-    
+    float tol = 0.07;
 
 };
 
@@ -102,8 +99,6 @@ private:
 //Constants
 const float MAX_PWM = 1000;
 const float MIN_PWM = -1000;
-
-//const float gearRatio = 166.0;
-//const float encCntsRev = 16.0*4;
+const float on_off_tolerance = 0.07;
 
 #endif
