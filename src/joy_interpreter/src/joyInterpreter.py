@@ -34,7 +34,7 @@ class commandClass:
 		self.z = (92-173)*((z+1)/2)+173 #normalize axes 3 from 0 to 1, set Z to reverse scale of axes 3.
 	def updateNav(self,nav):
 		self.nav = nav
-	def getNav(self)
+	def getNav(self):
 		return self.nav
 	def updateCommand(self):
 		#self.command = ik_legs(self.x,self.y,self.z)
@@ -119,7 +119,7 @@ def command_cb(msg):
 	command[0:3] = command1.getCommand()
 	command[3:6] = command2.getCommand()
 	command[6:9] = command3.getCommand()
-	command[9] = nav
+	command[9] = command1.getNav()
 	command_msg = Float32MultiArray(data = command)
 	ik_pub.publish(command_msg)
 
