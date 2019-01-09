@@ -15,6 +15,7 @@ class commandClass:
 		self.y = 0
 		self.z = 92
 		self.command = ik_legs(self.x,self.y,self.z)
+		self.nav = 0
 	def updateXY(self,x,y,joy_rad):
 		drad = axes_map(joy_rad,max_radius,0)
 		r = np.sqrt(x**2+y**2)
@@ -24,13 +25,17 @@ class commandClass:
 		self.z = z
 	def updateXYZ(self,x,y,z):
 		r = np.sqrt(x**2+y**2) 
-		if r > 7:
+		if r > 1:
 			self.x = 7*(x/r)
 			self.y = 7*(y/r)
 		else:
 			self.x = 7*x
 			self.y = 7*y
 		self.z = (92-173)*((z+1)/2)+173 #normalize axes 3 from 0 to 1, set Z to reverse scale of axes 3.
+	def updateNav(self,nav):
+		self.nav = nav
+	def getNav(self)
+		return self.nav
 	def updateCommand(self):
 		#self.command = ik_legs(self.x,self.y,self.z)
 		self.command = [self.x,self.y,self.z]
@@ -39,8 +44,6 @@ class commandClass:
 	def getStage(self):
 		return self.stage
 
-
-
 command = [0]*10;
 # z =92
 # x= 0
@@ -48,7 +51,6 @@ command = [0]*10;
 
 z_min = 92
 z_max = 173
-nav = 0
 
 def axes_map(js_sp,ax_max,ax_min):
 	sp = (js_sp+1)/2.0
@@ -57,16 +59,21 @@ def axes_map(js_sp,ax_max,ax_min):
 
 def command_cb(msg):
 	global command
-	nav = 0
 	#Take joystick input to determine what navigation method to use
 	if msg.buttons[3]:
-		nav = 0
+		command1.updateNav(0)
+		command2.updateNav(0)
+		command3.updateNav(0)
 	elif msg.buttons[4]:
-		nav = 1
+		command1.updateNav(1)
+		command2.updateNav(1)
+		command3.updateNav(1)
 	elif msg.buttons[5]:
-		nav = 2
+		command1.updateNav(2)
+		command2.updateNav(2)
+		command3.updateNav(2)
 
-	if nav == 0:
+	if command1.getNav() == 0:
 		# XYZ
 		if msg.buttons[8]:
 			command3.updateZ(axes_map(msg.axes[3],z_max,z_min))
@@ -89,7 +96,7 @@ def command_cb(msg):
 			command1.updateXY(-1*msg.axes[0],msg.axes[1],msg.axes[3])
 			command1.updateCommand()
 
-	elif nav == 1:
+	elif command1.getNav() == 1:
 		# Vector motion
 
 		# same as above, X and Y are set by axes 0 and 1, Z is set by axes 3
