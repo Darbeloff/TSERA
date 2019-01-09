@@ -1,6 +1,7 @@
 #include "motorClass.h"
 #include "Arduino.h"
 
+
 void forward(int dirPin,int pwmPin, int pwmVal){
   digitalWrite(dirPin, HIGH);
   analogWrite(pwmPin,pwmVal);
@@ -19,11 +20,17 @@ void motorClass::pos_on_off_controller(void){
    else{
     tol = on_off_tolerance;
    }
-  if(errorPos>tol){
+  if(errorPos>(2*tol)){
     forward(_dirPin,_pwmPin,255);
    }
-   else if(errorPos<-tol){
+  else if((errorPos>tol) && (errorPos<(2*tol))){
+    forward(_dirPin,_pwmPin,85);
+   }   
+   else if(errorPos<-(2*tol)){
     backward(_dirPin,_pwmPin,255);
+   }
+   else if((errorPos<-tol) && (errorPos>-(2*tol))){
+    backward(_dirPin,_pwmPin,85);
    }
    else{ motorClass::stopMotor();}
 }
@@ -34,4 +41,3 @@ void motorClass::log_on_off(){
   Serial.print(" MP: "+(String)MotorPos);
   Serial.println(" Error_Pos: "+(String)errorPos);
 }
-
