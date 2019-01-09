@@ -26,7 +26,7 @@ motorClass m2b =  motorClass(6,35,42,39,gearRatio1, EncCntsRev1);
 motorClass m2c =  motorClass(4,37,40,43,gearRatio1, EncCntsRev1);
 
 //stage 3
-motorClass m3a =  motorClass(2,29,22,25,gearRatio2, EncCntsRev2); //1-1
+motorClass m3a =  motorClass(2,29,22,25,gearRatio1, EncCntsRev2); //1-1
 motorClass m3b =  motorClass(3,28,24,23,gearRatio2, EncCntsRev2); //1-2
 motorClass m3c =  motorClass(10,31,26,27,gearRatio2, EncCntsRev2); //2-1
 
@@ -51,6 +51,7 @@ void command_callback(const std_msgs::Float32MultiArray &setpoint){
     m3a.setMotorPos(setpoint.data[6]);
     m3b.setMotorPos(setpoint.data[7]);
     m3c.setMotorPos(setpoint.data[8]);
+   
 }
 
 
