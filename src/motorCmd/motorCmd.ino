@@ -35,8 +35,6 @@ motorClass m3c =  motorClass(10,31,26,27,gearRatio2, EncCntsRev2); //2-1
 int vel_or_pos = 1; //position control
 int calibrated = 0;//initially not calibrated
 float epsilon;
-//float squareError2[3];
-//float squareError3[3];
 
 void command_callback(const std_msgs::Float32MultiArray &setpoint){
 
@@ -60,32 +58,27 @@ bool ROS_switch = true;
 bool Error_switch = true;
 ros::NodeHandle ArduinoInterface;
 std_msgs::Float32MultiArray outputVelocity;
-std_msgs::Float32MultiArray squareError_msg1;
+std_msgs::Float32MultiArray squareError_msg;
 std_msgs::Bool ready_next;
-//std_msgs::Float32 squareError_msg2;
-//std_msgs::Float32 squareError_msg3;
 
 //create publisher
 ros::Publisher error_check("continueWaypoint", &ready_next);
-ros::Publisher squareErrorPub1("squareError1", &squareError_msg1);
-//ros::Publisher squareErrorPub2("squareError2", &squareError_msg2);
-//ros::Publisher squareErrorPub3("squareError3", &squareError_msg3);
-
+ros::Publisher squareErrorPub("squareError", &squareError_msg);
 
 //subscriber
 ros::Subscriber<std_msgs::Float32MultiArray> velSub("ik", &command_callback);
-float array_storage[3];
+float array_storage[9];
 
 void setup () {
 
   if (ROS_switch){
     //initialize ros
     ArduinoInterface.initNode();
-    squareError_msg1.data_length = 3;
-    squareError_msg1.data = array_storage;
+    squareError_msg.data_length = 9;
+    squareError_msg.data = array_storage;
 
     //publisher
-    ArduinoInterface.advertise(squareErrorPub1);
+    ArduinoInterface.advertise(squareErrorPub);
     ArduinoInterface.advertise(error_check);
 
     
@@ -125,22 +118,6 @@ void loop (){
 //    m1a.pos_closedLoopController();
 //    m1b.pos_closedLoopController();
 //    m1c.pos_closedLoopController();
-
-//      squareError1[0] = sqrt(pow(m3a.errorPos,2)+ pow(m3b.errorPos,2)+ pow(m3c.errorPos,2));//Gives displacement error of the stage
-//      squareError1[1] = m3a.errorPos;//Gives magnitude and direction of error in motor
-//      squareError1[2] = m3b.errorPos;//Gives magnitude and direction of error in motor
-//      squareError1[3] = m3c.errorPos;//Gives magnitude and direction of error in motor
-
-
-//      squareError2[0] = pow(m2a.errorPos,2)+ pow(m2b.errorPos,2)+ pow(m2c.errorPos,2);
-//      squareError2[1] = pow(m2a.errorPos,2);
-//      squareError2[2] = pow(m2b.errorPos,2);
-//      squareError2[3] = pow(m2c.errorPos,2);
-      
-//      squareError3[0] = pow(m3a.errorPos,2)+ pow(m3b.errorPos,2)+ pow(m3c.errorPos,2);
-//      squareError3[1] = pow(m3a.errorPos,2);
-//      squareError3[2] = pow(m3b.errorPos,2);
-//      squareError3[3] = pow(m3c.errorPos,2);
     
         if(ROS_switch && Error_switch){ //Error Switch is set to stage 
           if ((sqrt(pow(m3a.errorPos,2)+ pow(m3b.errorPos,2)+ pow(m3c.errorPos,2)))< epsilon){
@@ -151,42 +128,19 @@ void loop (){
             ready_next.data = false;
             error_check.publish( &ready_next );
           }
-      squareError_msg1.data[0] = m3a.errorPos;
-      squareError_msg1.data[1] = m3b.errorPos; //first test, read encoder for all three, c was not responsive and A and B kept flickering back and forth.
-      squareError_msg1.data[2] = m3c.errorPos; 
-
-//      squareError_msg1.data[0] = squareError1[0];
-//      squareError_msg2.data[0] = squareError2[0];
-//      squareError_msg3.data[0] = squareError3[0];
-      
-      squareErrorPub1.publish( &squareError_msg1 );
-      //squareErrorPub2.publish( &squareError_msg2 );
-      //squareErrorPub3.publish( &squareError_msg3 );
+      squareError_msg.data[0] = m3a.errorPos;
+      squareError_msg.data[1] = m3b.errorPos; //first test, read encoder for all three, c was not responsive and A and B kept flickering back and forth.
+      squareError_msg.data[2] = m3c.errorPos; 
+      squareError_msg.data[3] = m3a.errorPos;
+      squareError_msg.data[4] = m3b.errorPos; //first test, read encoder for all three, c was not responsive and A and B kept flickering back and forth.
+      squareError_msg.data[5] = m3c.errorPos; 
+      squareError_msg.data[6] = m3a.errorPos;
+      squareError_msg.data[7] = m3b.errorPos; //first test, read encoder for all three, c was not responsive and A and B kept flickering back and forth.
+      squareError_msg.data[8] = m3c.errorPos; 
+      squareErrorPub.publish( &squareError_msg );
       ArduinoInterface.spinOnce();
       delay(50);
-  
-}
-////    if (ROS_switch){ //Error Switch is set to individual motors
-////      squareError_msg1.data[0] = 0; //squareError1[1];
-////      squareError_msg1.data[1] = 2200; //squareError1[2];
-////      squareError_msg1.data[2] = 3300; //squareError1[3];
-//      //squareError_msg1.data[3] = squareError1[3];
-//
-////      squareError_msg2.data[0] = squareError2[1];
-////      squareError_msg2.data[1] = squareError2[2];
-////      squareError_msg2.data[2] = squareError2[3];
-//
-////      squareError_msg3.data[0] = squareError3[1];
-////      squareError_msg3.data[1] = squareError3[2];
-////      squareError_msg3.data[2] = squareError3[3];
-//      
-//      squareErrorPub1.publish( &squareError_msg1 );
-//      //squareErrorPub2.publish( &squareError_msg2 );
-//      //squareErrorPub3.publish( &squareError_msg3 );
-//      ArduinoInterface.spinOnce();
-//      delay(100);
-//    }
-  
+        }
     else{
     m3c.log_on_off();
     }
