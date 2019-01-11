@@ -15,12 +15,16 @@ class commandClass:
 		self.y = 0
 		self.z = 92
 		self.command = ik_legs(self.x,self.y,self.z)
-	def updateXY(self,x,y,joy_rad):
-		drad = axes_map(joy_rad,max_radius,0)
-		r = np.sqrt(x**2+y**2)
-		self.x = drad*(x/r)
-		self.y = drad*(y/r)
-	def updateZ(self,z):
+	# def updateXY(self,x,y,joy_rad):
+	# 	drad = axes_map(joy_rad,max_radius,0)
+	# 	r = np.sqrt(x**2+y**2)
+	# 	self.x = drad*(x/r)
+	# 	self.y = drad*(y/r)
+	# def updateZ(self,z):
+	# 	self.z = z
+	def updateXYZ(self,x,y,z):
+		self.x = x
+		self.y = y
 		self.z = z
 	def updateCommand(self):
 		self.command = ik_legs(self.x,self.y,self.z)
@@ -45,27 +49,43 @@ def axes_map(js_sp,ax_max,ax_min):
 
 def ik_cb(msg):
 	global command
-	if msg.buttons[8]:
-		command3.updateZ(axes_map(msg.axes[3],z_max,z_min))
-		command3.updateCommand()
-	if msg.buttons[0]:
-		command3.updateXY(msg.axes[0],msg.axes[1],msg.axes[3])
-		command3.updateCommand()
+	# if msg.buttons[8]:
+	# 	command3.updateZ(axes_map(msg.axes[3],z_max,z_min))
+	# 	command3.updateCommand()
+	# if msg.buttons[0]:
+	# 	command3.updateXY(msg.axes[0],msg.axes[1],msg.axes[3])
+	# 	command3.updateCommand()
 
-	if msg.buttons[9]:
-		command2.updateZ(axes_map(msg.axes[3],z_max,z_min))
-		command2.updateCommand()
-	if msg.buttons[1]:
-		command2.updateXY(msg.axes[0],msg.axes[1],msg.axes[3])
-		command2.updateCommand()
+	# if msg.buttons[9]:
+	# 	command2.updateZ(axes_map(msg.axes[3],z_max,z_min))
+	# 	command2.updateCommand()
+	# if msg.buttons[1]:
+	# 	command2.updateXY(msg.axes[0],msg.axes[1],msg.axes[3])
+	# 	command2.updateCommand()
 
-	if msg.buttons[11]:
-		command1.updateZ(axes_map(msg.axes[3],z_max,z_min))
-		command1.updateCommand()
-	if msg.buttons[2]:
-		command1.updateXY(msg.axes[0],msg.axes[1],msg.axes[3])
-		command1.updateCommand()
+	# if msg.buttons[11]:
+	# 	command1.updateZ(axes_map(msg.axes[3],z_max,z_min))
+	# 	command1.updateCommand()
+	# if msg.buttons[2]:
+	# 	command1.updateXY(msg.axes[0],msg.axes[1],msg.axes[3])
+	# 	command1.updateCommand()
 
+	# print command
+	# command[0:3] = command1.getCommand()
+	# print command
+	# command[3:6] = command2.getCommand()
+	# print command
+	# command[6:] = command3.getCommand()
+	# print command
+
+	#Potentially include if statement for which stage is moving, current setup can have all stages move at the same time. But technically only one stage's numbers can be
+	#changed at a time
+	command1.updateXYZ(msg.data[0], msg.data[1], msg.data[2])
+	command1.updateCommand()
+	command2.updateXYZ(msg.data[3], msg.data[4], msg.data[5])
+	command2.updateCommand()
+	command3.updateXYZ(msg.data[6], msg.data[7], msg.data[8])
+	command3.updateCommand()
 	print command
 	command[0:3] = command1.getCommand()
 	print command
@@ -135,7 +155,7 @@ def ik_cb(msg):
 def ik():
 	print "Inverse Kinematics Calculating..."
 	rospy.init_node('ik')
-	rospy.Subscriber('/joy', Joy, ik_cb )
+	rospy.Subscriber('/desired_position', Float32MultiArray, ik_cb )
 
 	rospy.spin()
 
