@@ -5,7 +5,7 @@ import numpy as np
 from ik_helper import *
 from sensor_msgs.msg import Joy
 
-ik_pub = rospy.Publisher('/desired_position',Float32MultiArray,queue_size = 1)
+ik_pub = rospy.Publisher('/des_pos',Float32MultiArray,queue_size = 1)
 
 max_radius = 7
 class commandClass:
