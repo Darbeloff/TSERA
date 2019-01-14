@@ -44,7 +44,7 @@ def ik_cb(msg):
 	command2.updateCommand()
 	command3.updateXYZ(msg.data[6], msg.data[7], msg.data[8])
 	command3.updateCommand()
-	
+
 	command[0:3] = command1.getCommand()
 	command[3:6] = command2.getCommand()
 	command[6:] = command3.getCommand()
@@ -60,13 +60,8 @@ def ik_ort_cb(msg):
 def ik():
 	print "Inverse Kinematics Calculating..."
 	rospy.init_node('ik')
-<<<<<<< HEAD
 	rospy.Subscriber('/des_pos', Float32MultiArray, ik_cb )
 	rospy.Subscriber('/des_ort_xyz', Float32MultiArray, ik_cb )
-=======
-	rospy.Subscriber('/desired_position', Float32MultiArray, ik_cb )
->>>>>>> 433adbbdcaffc7f1df790f91856add53ce62a1ce
-
 	rospy.spin()
 
 if __name__ == '__main__':
