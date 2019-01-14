@@ -7,6 +7,7 @@ from sensor_msgs.msg import Joy
 
 ik_pub = rospy.Publisher('/des_pos',Float32MultiArray,queue_size = 1)
 
+
 max_radius = 7
 class commandClass:
 	def __init__(self,stage_):

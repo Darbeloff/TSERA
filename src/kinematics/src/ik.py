@@ -37,13 +37,51 @@ def axes_map(js_sp,ax_max,ax_min):
 
 def ik_cb(msg):
 	global command
+<<<<<<< HEAD
 
+=======
+	# if msg.buttons[8]:
+	# 	command3.updateZ(axes_map(msg.axes[3],z_max,z_min))
+	# 	command3.updateCommand()
+	# if msg.buttons[0]:
+	# 	command3.updateXY(msg.axes[0],msg.axes[1],msg.axes[3])
+	# 	command3.updateCommand()
+
+	# if msg.buttons[9]:
+	# 	command2.updateZ(axes_map(msg.axes[3],z_max,z_min))
+	# 	command2.updateCommand()
+	# if msg.buttons[1]:
+	# 	command2.updateXY(msg.axes[0],msg.axes[1],msg.axes[3])
+	# 	command2.updateCommand()
+
+	# if msg.buttons[11]:
+	# 	command1.updateZ(axes_map(msg.axes[3],z_max,z_min))
+	# 	command1.updateCommand()
+	# if msg.buttons[2]:
+	# 	command1.updateXY(msg.axes[0],msg.axes[1],msg.axes[3])
+	# 	command1.updateCommand()
+
+	# print command
+	# command[0:3] = command1.getCommand()
+	# print command
+	# command[3:6] = command2.getCommand()
+	# print command
+	# command[6:] = command3.getCommand()
+	# print command
+
+	#Potentially include if statement for which stage is moving, current setup can have all stages move at the same time. But technically only one stage's numbers can be
+	#changed at a time
+>>>>>>> 433adbbdcaffc7f1df790f91856add53ce62a1ce
 	command1.updateXYZ(msg.data[0], msg.data[1], msg.data[2])
 	command1.updateCommand()
 	command2.updateXYZ(msg.data[3], msg.data[4], msg.data[5])
 	command2.updateCommand()
 	command3.updateXYZ(msg.data[6], msg.data[7], msg.data[8])
 	command3.updateCommand()
+<<<<<<< HEAD
+=======
+	print command
+>>>>>>> 433adbbdcaffc7f1df790f91856add53ce62a1ce
 	command[0:3] = command1.getCommand()
 	command[3:6] = command2.getCommand()
 	command[6:] = command3.getCommand()
@@ -59,8 +97,12 @@ def ik_ort_cb(msg):
 def ik():
 	print "Inverse Kinematics Calculating..."
 	rospy.init_node('ik')
+<<<<<<< HEAD
 	rospy.Subscriber('/des_pos', Float32MultiArray, ik_cb )
 	rospy.Subscriber('/des_ort_xyz', Float32MultiArray, ik_cb )
+=======
+	rospy.Subscriber('/desired_position', Float32MultiArray, ik_cb )
+>>>>>>> 433adbbdcaffc7f1df790f91856add53ce62a1ce
 
 	rospy.spin()
 
