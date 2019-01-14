@@ -34,7 +34,7 @@ motorClass m3c =  motorClass(10,31,26,27,gearRatio2, EncCntsRev2); //2-1
 
 int vel_or_pos = 1; //position control
 int calibrated = 0;//initially not calibrated
-float epsilon;
+float epsilon = 0.07;
 
 void command_callback(const std_msgs::Float32MultiArray &setpoint){
 
@@ -118,16 +118,12 @@ void loop (){
 //    m1a.pos_closedLoopController();
 //    m1b.pos_closedLoopController();
 //    m1c.pos_closedLoopController();
-    
         if(ROS_switch && Error_switch){ //Error Switch is set to stage 
           if ((sqrt(pow(m3a.errorPos,2)+ pow(m3b.errorPos,2)+ pow(m3c.errorPos,2)))< epsilon){
             ready_next.data = true;
             error_check.publish( &ready_next );
           }
-          else{
-            ready_next.data = false;
-            error_check.publish( &ready_next );
-          }
+          
       squareError_msg.data[0] = m3a.errorPos;
       squareError_msg.data[1] = m3b.errorPos; //first test, read encoder for all three, c was not responsive and A and B kept flickering back and forth.
       squareError_msg.data[2] = m3c.errorPos; 

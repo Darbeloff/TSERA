@@ -20,7 +20,8 @@ class positionClass():
 		self.y = 0
 		self.z = 92
 		self.count = 0
-		self.list = [0]
+		self.list = [0]*100
+		self.grad_cont = True
 	def updateXYZ(self,x,y,z):
 		self.x = x
 		self.y = y
@@ -34,9 +35,8 @@ class positionClass():
 	def updatelist(self, xyz):
 		if self.list[0] == 0:
 			self.list[0] = xyz
-		elif len(self.list) < 10
-			self.list.append(xyz)
-			self.count = len(self.list)
+		elif self.list[-1] == 0:
+			self.list[self.count] = xyz
 	def updatepos(self):
 		self.count += 1
 	def position(self):
@@ -53,31 +53,38 @@ class positionClass():
 		self.list.pop(0)
 		xyz_msg = Float32MultiArray(data = self.list[0])
 		ort_pub.publish(xyz_msg)
+	def cont(self):
+		return self.grad_cont
 
 position = positionClass()
+alpha = 0.5
 
 def gradient_ascent(unit_vector):
 	
-	while position.position() < 10
-		x, y, Lt = symbols('x y Lt')
-		J = position.J(unit_vector, position.y())
-		djdx = diff(J, x)
-		djdy = diff(J, y)
+	#while position.position() < 10
+	position.grad_cont = True
+	x, y, Lt = symbols('x y Lt')
+	J = position.J(unit_vector, position.y())
+	djdx = diff(J, x)
+	djdy = diff(J, y)
+	while position.cont() == True:
 		new_x = position.x() + djdx.subs([(x, position.x()),(y,position.y()), (Lt, 85.3)])*alpha
 		new_y = position.y() + djdy.subs([(x,position.x()),(y,position.y()), (Lt, 85.3)])*alpha
-		new_z = 1 #This can't be correct
+		new_z = position.z() #This can't be correct
 		position.updateXYZ(new_x,new_y,new_z)
 		xyz = [position.x(),position.y(),position.z()]
 		position.updatelist(xyz)
-		if position.position() == 0:
-			xyz_msg = Float32MultiArray(data = xyz)
-			ort_pub.publish(xyz_msg)
+		position.updatepos()
+		xyz_msg = Float32MultiArray(data = xyz)
+		ort_pub.publish(xyz_msg)
 
 def ort_callback(msg):
 	xyz = [0]*3
 	magnitude = np.sqrt(((msg.data[0])**2) + ((msg.data[1])**2) + ((msg.data[2])**2))
 	unit_vector = [msg.data[0], msg.data[1], msg.data[2]]/magnitude
-	gradient_ascent(unit_vector)
+	position.grad_cont = False
+	if position.position() != 100:
+		gradient_ascent(unit_vector)
 
 def waypoint_callback(msg):
 	position.arrived()
@@ -85,7 +92,7 @@ def waypoint_callback(msg):
 def orientation():
 	rospy.init_node('grad_calc')
 	rospy.Subscriber("/des_ort", Float32MultiArray, ort_callback)
-	rospy.Subscriber("/next_waypoint", Bool, waypoint_callback)
+	rospy.Subscriber("/continueWaypoint", Bool, waypoint_callback)
 	rospy.spin()
 
 if __name__ = '__main__':
