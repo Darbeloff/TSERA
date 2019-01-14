@@ -12,14 +12,18 @@ class positionClass():
 		self.x = 0
 		self.y = 0
 		self.z = 92
+		self.count = 0
 	def updateXYZ(self,x,y,z):
 		self.x = x
 		self.y = y
 		self.z = z
+	def updatepos(self):
+		self.count += 1
+	def position(self):
+		return self.count
 
 
 def ort_callback(msg):
-	#Need arduino to publish current position so we can have XYZ.
 	xyz = [0]*3
 	magnitude = np.sqrt(((msg.data[0])**2) + ((msg.data[1])**2) + ((msg.data[2])**2))
 	unit_vector = [msg.data[0], msg.data[1], msg.data[2]]/magnitude
