@@ -44,7 +44,7 @@ class positionClass():
 	def J(self, T, y):
 		if abs(y) > 0.1:
 			b_vector = [b_x, b_y, b_z]
-		else
+		else:
 			b_y = -b_x*b_z
 			b_vector = [b_x, b_y, b_z]
 		J = np.dot(b_vector, T)
@@ -95,5 +95,5 @@ def orientation():
 	rospy.Subscriber("/continueWaypoint", Bool, waypoint_callback)
 	rospy.spin()
 
-if __name__ = '__main__':
+if __name__ == '__main__':
 	orientation()
