@@ -3,6 +3,8 @@ import rospy
 from std_msgs.msg import Float32MultiArray, Bool
 import numpy as np
 from sympy import *
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 #from ik_helper import *
 #from sensor_msgs.msg import Joy
 
@@ -76,6 +78,20 @@ def gradient_ascent(unit_vector):
 		new_y = position.y() + djdy.subs([(x,position.x()),(y,position.y()), (Lt, 85.3)])*alpha
 		new_z = position.z() #This can't be correct
 		position.updateXYZ(new_x,new_y,new_z)
+		vector_plot = np.array([[0,0,0,b_x.subs([(x, position.x()),(y,position.y()), (Lt, 85.3)]), b_y.subs([(x, position.x()),(y,position.y()), (Lt, 85.3)]), b_z.subs([(x, position.x()),(y,position.y()), (Lt, 85.3)])],unit_vector])
+
+		X, Y, Z, U, V, W = zip(*vector_plot)
+		fig = plt.figure()
+		ax = fig.add_subplot(111, projection='3d')
+		ax.quiver(X, Y, Z, U, V, W)
+		ax.set_xlim([-1, 1])
+		ax.set_ylim([-1, 1])
+		ax.set_zlim([-1, 1])
+		ax.set_xlabel('x')
+		ax.set_ylabel('y')
+		ax.set_zlabel('z')
+		plt.show()
+		plt.hold(True)
 		xyz = [position.x(),position.y(),position.z()]
 		xyz_msg = Float32MultiArray(data = xyz)
 		ort_pub.publish(xyz_msg)
