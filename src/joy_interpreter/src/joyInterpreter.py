@@ -5,8 +5,8 @@ import numpy as np
 from ik_helper import *
 from sensor_msgs.msg import Joy
 
-ik_pub = rospy.Publisher('/des_pos',Float32MultiArray,queue_size = 1)
-
+pos_pub = rospy.Publisher('/des_pos',Float32MultiArray,queue_size = 1)
+ort_pub = rospy.Publisher('/des_ort', Float32MultiArray, queue_size = 1)
 
 max_radius = 7
 class commandClass:
@@ -97,6 +97,13 @@ def command_cb(msg):
 			command1.updateXY(-1*msg.axes[0],msg.axes[1],msg.axes[3])
 			command1.updateCommand()
 
+		command[0:3] = command1.getCommand()
+		command[3:6] = command2.getCommand()
+		command[6:9] = command3.getCommand()
+		command[9] = command1.getNav()
+		command_msg = Float32MultiArray(data = command)
+		pos_pub.publish(command_msg)
+
 	elif command1.getNav() == 1:
 		# Vector motion
 
@@ -105,24 +112,36 @@ def command_cb(msg):
 		if msg.buttons[8]:
 			command3.updateXYZ(-1*msg.axes[0],msg.axes[1],msg.axes[3])
 			command3.updateCommand()
-
+			command[0:3] = command1.getCommand()
+			command[3:6] = command2.getCommand()
+			command[6:9] = command3.getCommand()
+			command[9] = command1.getNav()
+			command_msg = Float32MultiArray(data = command)
+			ort_pub.publish(command_msg)	
 		if msg.buttons[9]:
 			command2.updateXYZ(-1*msg.axes[0],msg.axes[1],msg.axes[3])
 			command2.updateCommand()
+			command[0:3] = command1.getCommand()
+			command[3:6] = command2.getCommand()
+			command[6:9] = command3.getCommand()
+			command[9] = command1.getNav()
+			command_msg = Float32MultiArray(data = command)
+			ort_pub.publish(command_msg)
 
 		if msg.buttons[11]:
 			command1.updateXYZ(-1*msg.axes[0],msg.axes[1],msg.axes[3])
 			command1.updateCommand()		
+			command[0:3] = command1.getCommand()
+			command[3:6] = command2.getCommand()
+			command[6:9] = command3.getCommand()
+			command[9] = command1.getNav()
+			command_msg = Float32MultiArray(data = command)
+			ort_pub.publish(command_msg)
 
 	#elif nav == 2: 
 		# gradient descent
 
-	command[0:3] = command1.getCommand()
-	command[3:6] = command2.getCommand()
-	command[6:9] = command3.getCommand()
-	command[9] = command1.getNav()
-	command_msg = Float32MultiArray(data = command)
-	ik_pub.publish(command_msg)
+
 
 
 def ik():
