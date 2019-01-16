@@ -29,7 +29,7 @@ class positionClass():
 	def updateXYZ(self,x,y,z):
 		self.x = x
 		self.y = y
-		self.z = z
+		self.z = 92+(z/7*(173-92))
 	# def x(self):
 	# 	return self.x
 	# def y(self):
@@ -49,8 +49,8 @@ class positionClass():
 		if abs(y) > 0.1:
 			b_vector = [b_x, b_y, b_z]
 		else:
-			b_y = -b_x*b_z
-			b_vector = [b_x, b_y, b_z]
+			b_vector = [b_x, -b_x*b_z, b_z]
+		print ('b_vector = ', b_vector)
 		J = np.dot(b_vector, T)
 		return J
 	def arrived(self):
@@ -72,25 +72,30 @@ def gradient_ascent(stage, unit_vector):
 	if stage == 1:
 		position = pos1
 	elif stage == 2:
-		position == pos2
+		position = pos2
 	else:
-		position == pos3
+		position = pos3
 	position.grad_cont = True
 	x, y, Lt = symbols('x y Lt')
+	
 	xyz = [0]*9
+	
 	new_x = 1
 	new_y = 1
 	new_z = 1
 
 	J = position.J(unit_vector, position.y)
+	print ('J =', J)
+
 	djdx = diff(J, x)
 	djdy = diff(J, y)
-	while position.cont() == True and sqrt((new_x-xyz[0])**2+(new_y-xyz[1])**2+(new_z-xyz[3])**2) > 0.1:
-		new_x = position.x + djdx.subs([(x, position.x),(y,position.y), (Lt, 85.3)])*alpha
-		new_y = position.y + djdy.subs([(x,position.x),(y,position.y), (Lt, 85.3)])*alpha
-		new_z = position.z #This can't be correct
-		position.updateXYZ(new_x,new_y,new_z)
-		vector_plot = np.array([[0,0,0,b_x.subs([(x, position.x),(y,position.y), (Lt, 85.3)]), b_y.subs([(x, position.x),(y,position.y), (Lt, 85.3)]), b_z.subs([(x, position.x),(y,position.y), (Lt, 85.3)])],[0, 0, 0, unit_vector[0], unit_vector[1], unit_vector[2]]])
+	print ('djdx = ', djdx) 
+	# while position.cont() == True and sqrt((new_x-xyz[0])**2+(new_y-xyz[1])**2+(new_z-xyz[3])**2) > 0.1:
+	# 	new_x = position.x + djdx.subs([(x, position.x),(y,position.y), (Lt, 85.3)])*alpha
+	# 	new_y = position.y + djdy.subs([(x,position.x),(y,position.y), (Lt, 85.3)])*alpha
+	# 	new_z = position.z #This can't be correct
+	# 	position.updateXYZ(new_x,new_y,new_z)
+	# 	vector_plot = np.array([[0,0,0,b_x.subs([(x, position.x),(y,position.y), (Lt, 85.3)]), b_y.subs([(x, position.x),(y,position.y), (Lt, 85.3)]), b_z.subs([(x, position.x),(y,position.y), (Lt, 85.3)])],[0, 0, 0, unit_vector[0], unit_vector[1], unit_vector[2]]])
 
 		# X, Y, Z, U, V, W = zip(*vector_plot)
 		# fig = plt.figure()
@@ -117,13 +122,16 @@ def ort_callback(msg):
 	T1 = [msg.data[0], msg.data[1], msg.data[2]]/mag1
 	T2 = [msg.data[3], msg.data[4], msg.data[5]]/mag2
 	T3 = [msg.data[6], msg.data[7], msg.data[8]]/mag3
-	print T3
+	print ('T3 = ', T3)
 	if (pos1.T()!=T1).any():
 		gradient_ascent(1, T1)
+		pos1.T = T1
 	elif (pos2.T()!=T2).any():
 		gradient_ascent(2, T2)
+		pos2.T = T2
 	elif (pos3.T()!=T3).any():
 		gradient_ascent(3, T3)
+		pos3.T = T3
 	
 # def waypoint_callback(msg):
 # 	pos1.arrived()

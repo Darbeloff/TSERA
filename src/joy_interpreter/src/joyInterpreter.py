@@ -32,7 +32,7 @@ class commandClass:
 		else:
 			self.x = 7*x
 			self.y = 7*y
-		self.z = (92-173)*((z+1)/2)+173 #normalize axes 3 from 0 to 1, set Z to reverse scale of axes 3.
+		self.z = (-7)*((z+1)/2)+7 #normalize axes 3 from 0 to 1, set Z to reverse scale of axes 3.
 	def updateNav(self,nav):
 		self.nav = nav
 	def getNav(self):
