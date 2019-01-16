@@ -5,8 +5,6 @@ import numpy as np
 from sympy import *
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-#from ik_helper import *
-#from sensor_msgs.msg import Joy
 
 ort_pub = rospy.Publisher("/des_ort_xyz", Float32MultiArray, queue_size = 1)
 
