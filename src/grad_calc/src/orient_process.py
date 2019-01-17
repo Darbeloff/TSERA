@@ -15,6 +15,7 @@ class poseClass():
 		self.z = 92
 		self.count = 0
 		self.b_list = []
+		self.j_list = []
 		self.grad_cont = True
 		self.T_vector = [0,0,0]
 		self.b_vector = [0,0,1]
@@ -70,6 +71,7 @@ class poseClass():
 			b_z = (Lt-2*sqrt(3)*sqrt(self.x**2+self.y**2))/(sqrt(Lt**2))
 			self.b_vector = [b_x, -b_x*b_z, b_z]
 		self.b_list.append(self.b_vector)
+		self.j_list.append([self.x, self.y])
 	def b_vec(self):
 		return self.b_vector
 
@@ -106,7 +108,7 @@ def gradient_ascent(stage, unit_vector):
 	new_y = 1
 	new_z = 1
 	
-	while pose.cont() == True and sqrt((new_x-xyz[0])**2+(new_y-xyz[1])**2+(new_z-xyz[3])**2) > 0.1:
+	while pose.cont() == True and sqrt((new_x-xyz[0])**2+(new_y-xyz[1])**2+(new_z-xyz[3])**2) > 0.001:
 		DJ = pose.calc_dj(Lt)
 	 	new_x = pose.x + DJ[0]*alpha
 	 	new_y = pose.y + Dj[1]*alpha
@@ -131,15 +133,26 @@ def gradient_ascent(stage, unit_vector):
 		# ax.set_zlabel('z')
 		# plt.show()
 		# plt.hold(True)
+		x = []
+		y = []
+		j = []
+		for m in len(pose.j_list):
+			x.append(pose.j_list[m][0])
+			y.append(pose.j_list[m][1])
+			j.append(J(pose.j_list[m][0],pose.j_list[m][1],unit_vector, Lt))
+
+
 		ax = fig.gca(projection='3d')
 		X = np.linspace(0,36.58,100)
 		Y = np.linspace(0,24.38,100)
 		X, Y = np.meshgrid(X,Y)
 		Z = np.zeros((len(X), len(Y)))
+		
 		for k in range(len(X)):
 			for m in range(len(Y)):
 				Z[k,m] = J(X[k,m], Y[k,m], unit_vector, Lt)
-		plt.plot(x,y)
+
+		ax.plot3D(x,y,j, 'black')
 		surf = ax.plot_surface(X,Y,Z,rstride=1,cmap = cm.RdBu, linewidth = 0, antialiased = False)
 
 		fig2 = plt.figure(2)
