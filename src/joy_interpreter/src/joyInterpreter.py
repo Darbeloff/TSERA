@@ -24,15 +24,19 @@ class commandClass:
 		self.y = drad*(y/r)
 	def updateZ(self,z):
 		self.z = z
-	def updateXYZ(self,x,y,z):
+	def updateXYZ(self,x,y,slide):
+		print slide
+		phi = ((slide+1)/2)*(np.radians(55))
+		print phi
 		r = np.sqrt(x**2+y**2) 
-		if r > 1:
-			self.x = 7*(x/r)
-			self.y = 7*(y/r)
-		else:
-			self.x = 7*x
-			self.y = 7*y
-		self.z = (-7)*((z+1)/2)+7 #normalize axes 3 from 0 to 1, set Z to reverse scale of axes 3.
+		self.z = np.cos(phi)
+		r_corr = np.sin(phi)
+		scale = r_corr/r
+		print r
+		print self.z
+		print r_corr
+		self.x = scale*x
+		self.y = scale*y
 	def updateNav(self,nav):
 		self.nav = nav
 	def getNav(self):
