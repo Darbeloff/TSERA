@@ -2,8 +2,10 @@
 import rospy
 from std_msgs.msg import Float32MultiArray, Bool
 import numpy as np
+from matplotlib import cm
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+from matplotlib.ticker import LinearLocator, FormatStrFormatter
 
 ort_pub = rospy.Publisher("/des_ort_xyz", Float32MultiArray, queue_size = 1)
 
@@ -38,15 +40,15 @@ class poseClass():
 	def calc_dj(self, Lt):
 		X = self.x
 		Y = self.y
-		self.djdx = ((2*(sqrt(3)*Lt + 3*X)*(-1 + X/sqrt(X**2 + Y**2)) + 6*(-X + sqrt(X**2 + Y**2)))/(2* sqrt(Lt^2) * sqrt(-6*Y^2 + 2*( sqrt(3)*Lt + 3*X )*(-X + sqrt(X**2 + Y**2)))))*self.T_vector[0] +\
-		(((X + sqrt(X**2 + Y**2))*(2*(sqrt(3)*Lt + 3*X)*(-1 + X/ sqrt(X**2 + Y**2)) + 6*(-X + sqrt(X**2 + Y**2))))/(2* sqrt(Lt**2)*Y* sqrt(-6*Y**2 + 2*( sqrt(3)*Lt + 3*X)*(-X + sqrt(X**2 + Y**2)))) + ((1 + X/ sqrt(X**2 + Y**2))* sqrt(-6*Y**2 + 2*( sqrt(3)*Lt + 3*X)*(-X + sqrt(X**2 + Y**2))))/(sqrt(Lt**2)*Y)) * self.T_vector[1] + \
-		(-((2* sqrt(3)*X)/( sqrt(Lt**2)* sqrt(X**2 + Y**2))))*self.T_vector[2]
+		self.djdx = ((2*(np.sqrt(3)*Lt + 3*X)*(-1 + X/np.sqrt(X**2 + Y**2)) + 6*(-X + np.sqrt(X**2 + Y**2)))/(2* np.sqrt(Lt**2) * np.sqrt(-6*Y**2 + 2*( np.sqrt(3)*Lt + 3*X )*(-X + np.sqrt(X**2 + Y**2)))))*self.T_vector[0] +\
+		(((X + np.sqrt(X**2 + Y**2))*(2*(np.sqrt(3)*Lt + 3*X)*(-1 + X/ np.sqrt(X**2 + Y**2)) + 6*(-X + np.sqrt(X**2 + Y**2))))/(2* np.sqrt(Lt**2)*Y* np.sqrt(-6*Y**2 + 2*( np.sqrt(3)*Lt + 3*X)*(-X + np.sqrt(X**2 + Y**2)))) + ((1 + X/ np.sqrt(X**2 + Y**2))* np.sqrt(-6*Y**2 + 2*( np.sqrt(3)*Lt + 3*X)*(-X + np.sqrt(X**2 + Y**2))))/(np.sqrt(Lt**2)*Y)) * self.T_vector[1] + \
+		(-((2* np.sqrt(3)*X)/( np.sqrt(Lt**2)* np.sqrt(X**2 + Y**2))))*self.T_vector[2]
 
-		self.djdy = ((-12*Y + (2*(sqrt(3)*Lt + 3*X)*Y)/ sqrt(X**2 + Y**2))/(2* sqrt(Lt**2)* Sqrt(-6*Y**2 + 2*( sqrt(3)*Lt + 3*X)*(-X + sqrt(X**2 + Y**2))))) * self.T_vector[0] +\
-		((((-12*Y + (2*( sqrt(3)*Lt + 3*X)*Y)/ sqrt(X**2 + Y**2))*(X + sqrt(X**2 + Y**2)))/(2* sqrt(Lt**2)*Y* sqrt(-6*Y**2 + 2*( sqrt(3)*Lt + 3*X)*(-X + sqrt(X**2 + Y**2)))) + sqrt(-6*Y**2 + 2*( sqrt(3)*Lt + 3*X)*(-X + sqrt(X**2 + Y**2)))/( sqrt(Lt**2)* sqrt(X**2 + Y**2)) - ((X + sqrt(X**2 + Y**2))* sqrt(-6*Y**2 + 2*( sqrt(3)*Lt + 3*X)*(-X + sqrt(X**2 + Y**2))))/( sqrt(Lt**2)*Y**2)))*self.T_vector[1] + \
-		((-((2* sqrt(3)*Y)/( sqrt(Lt**2)* sqrt(X**2 + Y**2)))))*self.T_vector[2]
+		self.djdy = ((-12*Y + (2*(np.sqrt(3)*Lt + 3*X)*Y)/ np.sqrt(X**2 + Y**2))/(2* np.sqrt(Lt**2)* np.sqrt(-6*Y**2 + 2*( np.sqrt(3)*Lt + 3*X)*(-X + np.sqrt(X**2 + Y**2))))) * self.T_vector[0] +\
+		((((-12*Y + (2*( np.sqrt(3)*Lt + 3*X)*Y)/ np.sqrt(X**2 + Y**2))*(X + np.sqrt(X**2 + Y**2)))/(2* np.sqrt(Lt**2)*Y* np.sqrt(-6*Y**2 + 2*( np.sqrt(3)*Lt + 3*X)*(-X + np.sqrt(X**2 + Y**2)))) + np.sqrt(-6*Y**2 + 2*( np.sqrt(3)*Lt + 3*X)*(-X + np.sqrt(X**2 + Y**2)))/( np.sqrt(Lt**2)* np.sqrt(X**2 + Y**2)) - ((X + np.sqrt(X**2 + Y**2))* np.sqrt(-6*Y**2 + 2*( np.sqrt(3)*Lt + 3*X)*(-X + np.sqrt(X**2 + Y**2))))/( np.sqrt(Lt**2)*Y**2)))*self.T_vector[1] + \
+		((-((2* np.sqrt(3)*Y)/( np.sqrt(Lt**2)* np.sqrt(X**2 + Y**2)))))*self.T_vector[2]
 
-		return [djdx, djdy]
+		return [self.djdx, self.djdy]
 	def arrived(self):
 		self.list.pop(0)
 		xyz_msg = Float32MultiArray(data = self.list[0])
@@ -54,7 +56,8 @@ class poseClass():
 	def cont(self):
 		return self.grad_cont
 	def updateT(self, vector):
-		self.b_list.clear()
+		if len(self.b_list) > 0:
+			self.b_list.clear()
 		self.T_vector = vector
 	def T(self):
 		return self.T_vector
@@ -62,13 +65,13 @@ class poseClass():
 		if self.x == 0 and self.y == 0:
 			 self.b_vector = [0,0,1]
 		elif abs(self.y) > 0.1:
-			b_x = (sqrt((-6*self.y**2)+2*(sqrt(3)*Lt+3*self.x)*(-self.x+sqrt(self.x**2+self.y**2))))/(sqrt(Lt**2))
-			b_y = ((self.x+sqrt(self.x**2+self.y**2))*sqrt(-6*self.y**2+2*(sqrt(3)*Lt+3*self.x)*(-self.x+sqrt(self.x**2+self.y**2))))/(sqrt(Lt**2)*self.y)
-			b_z = (Lt-2*sqrt(3)*sqrt(self.x**2+self.y**2))/(sqrt(Lt**2))
+			b_x = (np.sqrt((-6*self.y**2)+2*(np.sqrt(3)*Lt+3*self.x)*(-self.x+np.sqrt(self.x**2+self.y**2))))/(np.sqrt(Lt**2))
+			b_y = ((self.x+np.sqrt(self.x**2+self.y**2))*np.sqrt(-6*self.y**2+2*(np.sqrt(3)*Lt+3*self.x)*(-self.x+np.sqrt(self.x**2+self.y**2))))/(np.sqrt(Lt**2)*self.y)
+			b_z = (Lt-2*np.sqrt(3)*np.sqrt(self.x**2+self.y**2))/(np.sqrt(Lt**2))
 			self.b_vector = [b_x, b_y, b_z]
 		else:
-			b_x = (sqrt((-6*self.y**2)+2*(sqrt(3)*Lt+3*self.x)*(-self.x+sqrt(self.x**2+self.y**2))))/(sqrt(Lt**2))
-			b_z = (Lt-2*sqrt(3)*sqrt(self.x**2+self.y**2))/(sqrt(Lt**2))
+			b_x = (np.sqrt((-6*self.y**2)+2*(np.sqrt(3)*Lt+3*self.x)*(-self.x+np.sqrt(self.x**2+self.y**2))))/(np.sqrt(Lt**2))
+			b_z = (Lt-2*np.sqrt(3)*np.sqrt(self.x**2+self.y**2))/(np.sqrt(Lt**2))
 			self.b_vector = [b_x, -b_x*b_z, b_z]
 		self.b_list.append(self.b_vector)
 		self.j_list.append([self.x, self.y])
@@ -78,18 +81,18 @@ class poseClass():
 alpha = 0.5
 
 def J(x,y, unit_vector, Lt):
-	b_x = (sqrt((-6*y**2)+2*(sqrt(3)*Lt+3*x)*(-x+sqrt(x**2+y**2))))/(sqrt(Lt**2))
-	b_z = (Lt-2*sqrt(3)*sqrt(x**2+y**2))/(sqrt(Lt**2))	
+	b_x = (np.sqrt((-6*y**2)+2*(np.sqrt(3)*Lt+3*x)*(-x+np.sqrt(x**2+y**2))))/(np.sqrt(Lt**2))
+	b_z = (Lt-2*np.sqrt(3)*np.sqrt(x**2+y**2))/(np.sqrt(Lt**2))	
 
 	if x == 0 and y == 0:
 		 b_vector = [0,0,1]
 	elif abs(y) > 0.1:
-		b_y = ((x+sqrt(x**2+y**2))*sqrt(-6*y**2+2*(sqrt(3)*Lt+3*x)*(-x+sqrt(x**2+y**2))))/(sqrt(Lt**2)*y)
+		b_y = ((x+np.sqrt(x**2+y**2))*np.sqrt(-6*y**2+2*(np.sqrt(3)*Lt+3*x)*(-x+np.sqrt(x**2+y**2))))/(np.sqrt(Lt**2)*y)
 		b_vector = [b_x, b_y, b_z]
 	else:
 		b_vector = [b_x, -b_x*b_z, b_z]
 
-	J = np.dot[b_vector,unit_vector]
+	J = np.dot(b_vector,unit_vector)
 
 	return J
 def gradient_ascent(stage, unit_vector):
@@ -107,11 +110,12 @@ def gradient_ascent(stage, unit_vector):
 	new_x = 1
 	new_y = 1
 	new_z = 1
-	
-	while pose.cont() == True and sqrt((new_x-xyz[0])**2+(new_y-xyz[1])**2+(new_z-xyz[3])**2) > 0.001:
+	Lt = 85.3 #Need to calculate from CAD
+
+	while pose.cont() == True and np.sqrt((new_x-xyz[0])**2+(new_y-xyz[1])**2+(new_z-xyz[3])**2) > 0.001:
 		DJ = pose.calc_dj(Lt)
 	 	new_x = pose.x + DJ[0]*alpha
-	 	new_y = pose.y + Dj[1]*alpha
+	 	new_y = pose.y + DJ[1]*alpha
 	 	new_z = pose.z 
 	 	pose.updateXYZ(new_x,new_y,new_z, Lt)
 		xyz = [pose1.x, pose1.y, pose1.z, pose2.x, pose2.y, pose2.z, pose3.x, pose3.y, pose3.z]
@@ -122,7 +126,7 @@ def gradient_ascent(stage, unit_vector):
 	if pose.cont() == True:
 		#vector_plot = np.array([[0,0,0,pose., b_y.subs([(x, position.x),(y,position.y), (Lt, 85.3)]), b_z.subs([(x, position.x),(y,position.y), (Lt, 85.3)])],[0, 0, 0, unit_vector[0], unit_vector[1], unit_vector[2]]])
 		# X, Y, Z, U, V, W = zip(*vector_plot)
-		 fig = plt.figure(1)
+		fig = plt.figure(1)
 		# ax = fig.add_subplot(111, projection='3d')
 		# ax.quiver(U, V, W, X, Y, Z)
 		# ax.set_xlim([-1, 1])
@@ -136,15 +140,15 @@ def gradient_ascent(stage, unit_vector):
 		x = []
 		y = []
 		j = []
-		for m in len(pose.j_list):
+		for m in range(len(pose.j_list)):
 			x.append(pose.j_list[m][0])
 			y.append(pose.j_list[m][1])
 			j.append(J(pose.j_list[m][0],pose.j_list[m][1],unit_vector, Lt))
 
 
 		ax = fig.gca(projection='3d')
-		X = np.linspace(0,36.58,100)
-		Y = np.linspace(0,24.38,100)
+		X = np.linspace(0, 25,100)
+		Y = np.linspace(0, 25,100)
 		X, Y = np.meshgrid(X,Y)
 		Z = np.zeros((len(X), len(Y)))
 		
@@ -152,7 +156,7 @@ def gradient_ascent(stage, unit_vector):
 			for m in range(len(Y)):
 				Z[k,m] = J(X[k,m], Y[k,m], unit_vector, Lt)
 
-		ax.plot3D(x,y,j, 'black')
+		ax.plot(x,y,'black')
 		surf = ax.plot_surface(X,Y,Z,rstride=1,cmap = cm.RdBu, linewidth = 0, antialiased = False)
 
 		fig2 = plt.figure(2)
@@ -165,13 +169,13 @@ def ort_callback(msg):
 	T2 = [msg.data[3], msg.data[4], msg.data[5]]
 	T3 = [msg.data[6], msg.data[7], msg.data[8]]
 	print ('T3 = ', T3)
-	if (pose1.T()!=T1).any():
+	if ((np.array([pose1.T()])==np.array([T1])).all()) == False:
 		pose1.updateT(T1)
 		gradient_ascent(1, T1)
-	elif (pose2.T()!=T2).any():
+	elif ((np.array([pose2.T()])==np.array([T2])).all()) == False:
 		pose2.updateT(T2)
 		gradient_ascent(2, T2)
-	elif (pose3.T()!=T3).any():
+	elif ((np.array([pose3.T()])==np.array([T3])).all()) == False:
 		pose3.updateT(T3)
 		gradient_ascent(3, T3)
 	

@@ -25,16 +25,12 @@ class commandClass:
 	def updateZ(self,z):
 		self.z = z
 	def updateXYZ(self,x,y,slide):
-		print slide
 		phi = ((slide+1)/2)*(np.radians(55))
-		print phi
+		print np.degrees(phi)
 		r = np.sqrt(x**2+y**2) 
 		self.z = np.cos(phi)
 		r_corr = np.sin(phi)
 		scale = r_corr/r
-		print r
-		print self.z
-		print r_corr
 		self.x = scale*x
 		self.y = scale*y
 	def updateNav(self,nav):
@@ -120,6 +116,7 @@ def command_cb(msg):
 			command[3:6] = command2.getCommand()
 			command[6:9] = command3.getCommand()
 			command[9] = command1.getNav()
+			print command[6:9]
 			command_msg = Float32MultiArray(data = command)
 			ort_pub.publish(command_msg)	
 		if msg.buttons[9]:
@@ -139,6 +136,7 @@ def command_cb(msg):
 			command[3:6] = command2.getCommand()
 			command[6:9] = command3.getCommand()
 			command[9] = command1.getNav()
+
 			command_msg = Float32MultiArray(data = command)
 			ort_pub.publish(command_msg)
 
