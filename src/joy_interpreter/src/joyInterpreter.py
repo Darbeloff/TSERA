@@ -15,7 +15,9 @@ class commandClass:
 		self.x = 0
 		self.y = 0
 		self.z = 92
-		self.command = ik_legs(self.x,self.y,self.z)
+		self.z_vec = 1
+		self.command_xyz = [self.x,self.y,self.z]
+		self.command_vec = [self.x, self.y, self.z_vec]
 		self.nav = 0
 	def updateXY(self,x,y,joy_rad):
 		drad = axes_map(joy_rad,max_radius,0)
@@ -28,7 +30,7 @@ class commandClass:
 		phi = ((slide+1)/2)*(np.radians(55))
 		print np.degrees(phi)
 		r = np.sqrt(x**2+y**2) 
-		self.z = np.cos(phi)
+		self.z_vec = np.cos(phi)
 		r_corr = np.sin(phi)
 		scale = r_corr/r
 		self.x = scale*x
@@ -37,11 +39,16 @@ class commandClass:
 		self.nav = nav
 	def getNav(self):
 		return self.nav
-	def updateCommand(self):
+	def updateCommand_xyz(self):
 		#self.command = ik_legs(self.x,self.y,self.z)
-		self.command = [self.x,self.y,self.z]
-	def getCommand(self):
-		return self.command
+		self.command_xyz = [self.x,self.y,self.z]
+	def updateCommand_vec(self):
+		#self.command = ik_legs(self.x,self.y,self.z)
+		self.command_vec = [self.x,self.y,self.z_vec]
+	def getCommand_xyz(self):
+		return self.command_xyz
+	def getCommand_vec(self):
+		return self.command_vec
 	def getStage(self):
 		return self.stage
 
@@ -78,28 +85,28 @@ def command_cb(msg):
 		# XYZ
 		if msg.buttons[8]:
 			command3.updateZ(axes_map(msg.axes[3],z_max,z_min))
-			command3.updateCommand()
+			command3.updateCommand_xyz()
 		if msg.buttons[0]:
 			command3.updateXY(-1*msg.axes[0],msg.axes[1],msg.axes[3])
-			command3.updateCommand()
+			command3.updateCommand_xyz()
 
 		if msg.buttons[9]:
 			command2.updateZ(axes_map(msg.axes[3],z_max,z_min))
-			command2.updateCommand()
+			command2.updateCommand_xyz()
 		if msg.buttons[1]:
 			command2.updateXY(-1*msg.axes[0],msg.axes[1],msg.axes[3])
-			command2.updateCommand()
+			command2.updateCommand_xyz()
 
 		if msg.buttons[11]:
 			command1.updateZ(axes_map(msg.axes[3],z_max,z_min))
-			command1.updateCommand()
+			command1.updateCommand_xyz()
 		if msg.buttons[2]:
 			command1.updateXY(-1*msg.axes[0],msg.axes[1],msg.axes[3])
-			command1.updateCommand()
+			command1.updateCommand_xyz()
 
-		command[0:3] = command1.getCommand()
-		command[3:6] = command2.getCommand()
-		command[6:9] = command3.getCommand()
+		command[0:3] = command1.getCommand_xyz()
+		command[3:6] = command2.getCommand_xyz()
+		command[6:9] = command3.getCommand_xyz()
 		command[9] = command1.getNav()
 		command_msg = Float32MultiArray(data = command)
 		pos_pub.publish(command_msg)
@@ -109,33 +116,33 @@ def command_cb(msg):
 
 		# same as above, X and Y are set by axes 0 and 1, Z is set by axes 3
 		# have to make sure X and Y are within a circle of radius 7
-		if msg.buttons[8]:
+		if msg.buttons[7]:
 			command3.updateXYZ(-1*msg.axes[0],msg.axes[1],msg.axes[3])
-			command3.updateCommand()
-			command[0:3] = command1.getCommand()
-			command[3:6] = command2.getCommand()
-			command[6:9] = command3.getCommand()
-			command[9] = command1.getNav()
+			command3.updateCommand_vec()
+			command[0:3] = command1.getCommand_vec()
+			command[3:6] = command2.getCommand_vec()
+			command[6:9] = command3.getCommand_vec()
+			command[9] = 8
 			print command[6:9]
 			command_msg = Float32MultiArray(data = command)
 			ort_pub.publish(command_msg)	
 		if msg.buttons[9]:
 			command2.updateXYZ(-1*msg.axes[0],msg.axes[1],msg.axes[3])
-			command2.updateCommand()
-			command[0:3] = command1.getCommand()
-			command[3:6] = command2.getCommand()
-			command[6:9] = command3.getCommand()
-			command[9] = command1.getNav()
+			command2.updateCommand_vec()
+			command[0:3] = command1.getCommand_vec()
+			command[3:6] = command2.getCommand_vec()
+			command[6:9] = command3.getCommand_vec()
+			command[9] = 10
 			command_msg = Float32MultiArray(data = command)
 			ort_pub.publish(command_msg)
 
-		if msg.buttons[11]:
+		if msg.buttons[10]:
 			command1.updateXYZ(-1*msg.axes[0],msg.axes[1],msg.axes[3])
-			command1.updateCommand()		
-			command[0:3] = command1.getCommand()
-			command[3:6] = command2.getCommand()
-			command[6:9] = command3.getCommand()
-			command[9] = command1.getNav()
+			command1.updateCommand_vec()		
+			command[0:3] = command1.getCommand_vec()
+			command[3:6] = command2.getCommand_vec()
+			command[6:9] = command3.getCommand_vec()
+			command[9] = 11
 
 			command_msg = Float32MultiArray(data = command)
 			ort_pub.publish(command_msg)
