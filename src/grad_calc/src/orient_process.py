@@ -145,9 +145,9 @@ def gradient_ascent(stage, unit_vector):
 	count = 0
 	
 	print "starting loop"
-	while continue_loop == True and np.linalg.norm(np.cross(pose.b_vec(), pose.T())) > 0.01: #means that at max extension, error is 1.73cm. Current loop below can get below .005, which is an error of .865 cm
+	while continue_loop == True and np.linalg.norm(np.cross(pose.b_vec(), pose.T())) > 0.005: #Current loop below can get below .005, which is an error of .865 cm
 		DJ = pose.calc_dj(Lt)
-		if np.linalg.norm(np.cross(pose.b_vec(), pose.T())) < 0.005 and count == 0:
+		if np.linalg.norm(np.cross(pose.b_vec(), pose.T())) < 0.009 and count == 0:
 			alpha = 0.01
 			count += 1
 		# elif np.linalg.norm(np.cross(pose.b_vec(), pose.T())) < 0.003 and count  = 1
