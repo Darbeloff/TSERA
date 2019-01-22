@@ -85,7 +85,7 @@ class poseClass():
 		return self.grad_cont
 	def updateT(self, vector):
 		if len(self.b_list) > 0:
-			self.b_list.clear()
+			del self.b_list[:]
 		self.T_vector = vector
 	def T(self):
 		return self.T_vector
@@ -105,11 +105,6 @@ class poseClass():
 		self.j_list.append([self.x, self.y])
 	def b_vec(self):
 		return self.b_vector
-	def copy(self):
-
-		return self.T_vector
-
-alpha = 0.5
 
 def J(x,y, unit_vector, Lt):
 	b_x = (np.sqrt((-6*y**2)+2*(np.sqrt(3)*Lt+3*x)*(-x+np.sqrt(x**2+y**2))))/(np.sqrt(Lt**2))
@@ -142,21 +137,21 @@ def gradient_ascent(stage, unit_vector):
 	new_y = 1
 	new_z = 1
 	Lt = 85.3 #Need to calculate from CAD
-	alpha = 0.05
+	alpha = 0.1
 	prev_dj0 = 0
 	prev_dj1 = 0
 	count = 0
-	past_t = pose.T().copy()
+	past_t = pose.T()[:]
 	
 	print "starting loop"
 	while continue_loop == True and np.linalg.norm(np.cross(pose.b_vec(), pose.T())) > 0.0048: #Current loop below can get below .005, which is an error of .865 cm
-		if((pose.T() == past_t).all()) == False:
+		if(pose.T() == past_t) == False:
 			continue_loop = False
 			break
 		DJ = pose.calc_dj(Lt)
-		if np.linalg.norm(np.cross(pose.b_vec(), pose.T())) < 0.005 and count == 0:
-			alpha = 0.01
-			count += 1
+		# if np.linalg.norm(np.cross(pose.b_vec(), pose.T())) < 0.005 and count == 0:
+		# 	alpha = 0.01
+		# 	count += 1
 		# elif np.linalg.norm(np.cross(pose.b_vec(), pose.T())) < 0.003 and count  = 1
 	 	new_x = pose.x + DJ[0]*alpha
 	 	new_y = pose.y + DJ[1]*alpha
@@ -191,8 +186,8 @@ def gradient_ascent(stage, unit_vector):
 
 
 		ax = fig.gca(projection='3d')
-		X = np.linspace(0, 25,100)
-		Y = np.linspace(0, 25,100)
+		X = np.linspace(-7, 7,100)
+		Y = np.linspace(-7, 7,100)
 		X, Y = np.meshgrid(X,Y)
 		Z = np.zeros((len(X), len(Y)))
 		
