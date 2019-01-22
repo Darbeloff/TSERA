@@ -8,7 +8,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
 
 ort_pub = rospy.Publisher("/des_ort_xyz", Float32MultiArray, queue_size = 1)
-continue_loop = True
+# continue_loop = True
 
 class poseClass():
 	def __init__(self, stage_):
@@ -105,6 +105,9 @@ class poseClass():
 		self.j_list.append([self.x, self.y])
 	def b_vec(self):
 		return self.b_vector
+	def copy(self):
+
+		return self.T_vector
 
 alpha = 0.5
 
@@ -143,9 +146,13 @@ def gradient_ascent(stage, unit_vector):
 	prev_dj0 = 0
 	prev_dj1 = 0
 	count = 0
+	past_t = pose.T().copy()
 	
 	print "starting loop"
 	while continue_loop == True and np.linalg.norm(np.cross(pose.b_vec(), pose.T())) > 0.0048: #Current loop below can get below .005, which is an error of .865 cm
+		if((pose.T() == past_t).all()) == False:
+			continue_loop = False
+			break
 		DJ = pose.calc_dj(Lt)
 		if np.linalg.norm(np.cross(pose.b_vec(), pose.T())) < 0.005 and count == 0:
 			alpha = 0.01
@@ -194,7 +201,7 @@ def gradient_ascent(stage, unit_vector):
 				Z[k,m] = J(X[k,m], Y[k,m], unit_vector, Lt)
 
 		ax.plot(x,y,'black')
-		surf = ax.plot_surface(X,Y,Z,rstride=1,cmap = cm.RdBu, linewidth = 0, antialiased = False)
+		surf = ax.plot_surface(X,Y,Z,rstride=1, cmap = cm.RdBu, linewidth = 0, antialiased = False)
 
 		fig2 = plt.figure(2)
 		plt.contour(X,Y,Z,200)
@@ -207,15 +214,15 @@ def ort_callback(msg):
 	T3 = [msg.data[6], msg.data[7], msg.data[8]]
 	print ('T3 = ', T3)
 	if msg.data[9] == 11.0:
-		continue_loop = False
+		#continue_loop = False
 		pose1.updateT(T1)
 		gradient_ascent(1, T1)
 	elif msg.data[9] == 10.0:
-		continue_loop = False
+		#continue_loop = False
 		pose2.updateT(T2)
 		gradient_ascent(2, T2)
 	elif msg.data[9] == 8.0:
-		continue_loop = False
+		#continue_loop = False
 		pose3.updateT(T3)
 		gradient_ascent(3, T3)
 	
