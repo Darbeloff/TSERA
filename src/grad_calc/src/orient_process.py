@@ -13,8 +13,8 @@ ort_pub = rospy.Publisher("/des_ort_xyz", Float32MultiArray, queue_size = 1)
 class poseClass():
 	def __init__(self, stage_):
 		self.stage = stage_
-		self.x = 0.1
-		self.y = 0.1
+		self.x = 0
+		self.y = 0
 		self.z = 92
 		self.count = 0
 		self.b_list = []
@@ -137,7 +137,7 @@ def gradient_ascent(stage, unit_vector):
 	new_y = 1
 	new_z = 1
 	Lt = 85.3 #Need to calculate from CAD
-	alpha = 1
+	alpha = 0.1
 	prev_dj0 = 0
 	prev_dj1 = 0
 	count = 0

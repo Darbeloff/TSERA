@@ -163,15 +163,19 @@ def gradient_ascent(stage, unit_vector):
 			print "starting loop again"
 			phi = (np.radians(55))
 			r = np.sqrt(X[k,m]**2+Y[k,m]**2) 
-			z_vec = np.cos(phi)
 			r_corr = np.sin(phi)
 			if r == 0:
 				x = 0
 				y = 0
-			else:
+			elif r >= r_corr:
 				scale = r_corr/r
 				x = scale*X[k,m]
 				y = scale*Y[k,m]
+				z_vec = np.cos(phi)
+			elif r < r_corr:
+				x = X[k,m]
+				y = Y[k,m]
+				z_vec = np.cos(np.arcsin(r))
 			T = [x, y, z_vec] 
 			pose.updateT(T)
 			while step < 5000 and np.linalg.norm(np.cross(pose.b_vec(), pose.T())) > 0.009: #Current loop below can get below .005, which is an error of .865 cm
@@ -183,7 +187,6 @@ def gradient_ascent(stage, unit_vector):
 				print DJ[0], DJ[1], np.linalg.norm(np.cross(pose.b_vec(), pose.T()))
 				step += 1
 			Z[k,m] = np.linalg.norm(np.cross(pose.b_vec(), pose.T()))
-			Z_step[k,m] = step
 			pose.updateXYZ(0.1,0.1,92,Lt)
 			step = 0
 	# if continue_loop == False:
@@ -221,12 +224,13 @@ def gradient_ascent(stage, unit_vector):
 
 	# 	ax.plot(x,y,'black')
 	# 	surf = ax.plot_surface(X,Y,Z,rstride=1, cmap = cm.RdBu, linewidth = 0, antialiased = False)
-
+	print Z
+	
 	fig = plt.figure(1)
 	plt.scatter(X, Y, c = Z, cmap = cm.RdBu)
-	fig2 = plt.figure(2)
-	plt.scatter(X, Y, c = Z_step, cmap = cm.RdBu)
-	plt.show()
+	# fig2 = plt.figure(2)
+	# plt.scatter(X, Y, c = Z_step, cmap = cm.RdBu)
+	# plt.show()
 
 
 
