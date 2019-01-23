@@ -137,11 +137,12 @@ def gradient_ascent(stage, unit_vector):
 	new_y = 1
 	new_z = 1
 	Lt = 85.3 #Need to calculate from CAD
-	alpha = 0.1
+	alpha = 1
 	prev_dj0 = 0
 	prev_dj1 = 0
 	count = 0
 	past_t = pose.T()[:]
+	step = 0
 	
 	print "starting loop"
 	while continue_loop == True and np.linalg.norm(np.cross(pose.b_vec(), pose.T())) > 0.0048: #Current loop below can get below .005, which is an error of .865 cm
@@ -161,6 +162,8 @@ def gradient_ascent(stage, unit_vector):
 		xyz_msg = Float32MultiArray(data = xyz)
 		ort_pub.publish(xyz_msg)
 		print DJ[0], DJ[1], np.linalg.norm(np.cross(pose.b_vec(), pose.T()))
+		step += 1
+	print step
 
 	if continue_loop == True:
 		#vector_plot = np.array([[0,0,0,pose., b_y.subs([(x, position.x),(y,position.y), (Lt, 85.3)]), b_z.subs([(x, position.x),(y,position.y), (Lt, 85.3)])],[0, 0, 0, unit_vector[0], unit_vector[1], unit_vector[2]]])
