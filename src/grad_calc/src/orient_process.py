@@ -111,7 +111,7 @@ def J(x,y, unit_vector, Lt):
 		b_y = ((x+np.sqrt(x**2+y**2))*np.sqrt(-6*y**2+2*(np.sqrt(3)*Lt+3*x)*(-x+np.sqrt(x**2+y**2))))/(np.sqrt(Lt**2)*y)
 		b_vector = [b_x, b_y, b_z]
 	else:
-		b_vector = [b_x, -b_x*b_z, b_z]
+		b_vector = [b_x, np.sqrt(1-b_x**2-b_z**2), b_z]
 
 	J = np.dot(b_vector,unit_vector)
 
@@ -156,7 +156,7 @@ def gradient_ascent(stage, unit_vector):
 		xyz = [pose1.x, pose1.y, pose1.z, pose2.x, pose2.y, pose2.z, pose3.x, pose3.y, pose3.z]
 		xyz_msg = Float32MultiArray(data = xyz)
 		ort_pub.publish(xyz_msg)
-		print DJ[1], DJ[1], DJ[2], pose.b_vec()[0], pose.b_vec()[2], np.linalg.norm(np.cross(pose.b_vec(), pose.T()))
+		print new_x, new_y, new_z #, DJ[1], DJ[1], DJ[2], pose.b_vec()[0], pose.b_vec()[2], np.linalg.norm(np.cross(pose.b_vec(), pose.T()))
 		step += 1
 		r.sleep()
 	print step
