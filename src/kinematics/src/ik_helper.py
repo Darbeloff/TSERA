@@ -87,6 +87,7 @@ def ik_legs(x,y,z):
 		M = np.sqrt(2*(r - x)*(np.sqrt(3)*Lt + 3*x) - 6.0*y**2.0)
 		lb_L = L_b(x, y, z, Lt, s0, r, M, k)
 		lc_L = L_c(x, y, z, Lt, s0, r, M, k)
+		#use simpler kinematic equations
 	else:
 		k = np.sqrt(-3*y**2 + (np.sqrt(3)*Lt + 3*x)*(-x + r))
 		M = np.sqrt(2*(r - x)*(np.sqrt(3)*Lt + 3*x) - 6*y**2)
