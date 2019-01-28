@@ -51,10 +51,13 @@ class poseClass():
 
 		#Need to edit this section, figure out what to do around (0,0) and y = 0, algebraic expressions won't work. Potential for Abbas method of B_y to work, if not, need to trick it. 
 		elif (abs(self.y) < 0.1) != (abs(self.x) < 0.1):
-			djdx2 = ((Lt - 2*np.sqrt (3)*np.sqrt (X ** 2 + Y ** 2))*(2*(np.sqrt (3)*Lt + 3*X)*(-1 + X/np.sqrt(X ** 2 + Y ** 2)) + 6*(-X + np.sqrt(X ** 2 + Y ** 2))))/(2*Lt ** 2*np.sqrt (-6*Y ** 2 + 2*(np.sqrt (3)*Lt + 3*X)*(-X + np.sqrt (X ** 2 + Y ** 2)))) + (2*np.sqrt (3)*X*np.sqrt (-6*Y ** 2 + 2*(np.sqrt (3)*Lt + 3*X)*(-X + np.sqrt (X ** 2 + Y ** 2))))/(Lt ** 2*np.sqrt (X ** 2 + Y ** 2))
-			djdy2 = ((-12*Y + (2*(np.sqrt (3)*Lt + 3*X)*Y)/np.sqrt (X ** 2 + Y ** 2))*(Lt - 2*np.sqrt(3)*np.sqrt(X ** 2 + Y ** 2)))/(2*Lt ** 2*np.sqrt(-6*Y ** 2 + 2*(np.sqrt (3)*Lt + 3*X)*(-X + np.sqrt (X ** 2 + Y ** 2)))) + (2*np.sqrt (3)*Y*np.sqrt (-6*Y ** 2 + 2*(np.sqrt (3)*Lt + 3*X)*(-X + np.sqrt (X ** 2 + Y ** 2))))/(Lt ** 2*np.sqrt (X ** 2 + Y ** 2))
-			djdx = djdx1*self.T_vector[0] + djdx2*self.T_vector[1] + djdx3*self.T_vector[2]
-			djdy = djdy1*self.T_vector[0] + djdy2*self.T_vector[1] + djdy3*self.T_vector[2]
+			#derivative where b_y = np.sqrt(1-b_x**2-b_z**2)
+			
+			#derivative where b_y = -b_x*b_z
+			# djdx2 = -(((Lt - 2*np.sqrt (3)*np.sqrt (X ** 2 + Y ** 2))*(2*(np.sqrt (3)*Lt + 3*X)*(-1 + X/np.sqrt(X ** 2 + Y ** 2)) + 6*(-X + np.sqrt(X ** 2 + Y ** 2))))/(2*Lt ** 2*np.sqrt (-6*Y ** 2 + 2*(np.sqrt (3)*Lt + 3*X)*(-X + np.sqrt (X ** 2 + Y ** 2))))) + (2*np.sqrt (3)*X*np.sqrt (-6*Y ** 2 + 2*(np.sqrt (3)*Lt + 3*X)*(-X + np.sqrt (X ** 2 + Y ** 2))))/(Lt ** 2*np.sqrt (X ** 2 + Y ** 2))
+			# djdy2 = -(((-12*Y + (2*(np.sqrt (3)*Lt + 3*X)*Y)/np.sqrt (X ** 2 + Y ** 2))*(Lt - 2*np.sqrt(3)*np.sqrt(X ** 2 + Y ** 2)))/(2*Lt ** 2*np.sqrt(-6*Y ** 2 + 2*(np.sqrt (3)*Lt + 3*X)*(-X + np.sqrt (X ** 2 + Y ** 2))))) + (2*np.sqrt (3)*Y*np.sqrt (-6*Y ** 2 + 2*(np.sqrt (3)*Lt + 3*X)*(-X + np.sqrt (X ** 2 + Y ** 2))))/(Lt ** 2*np.sqrt (X ** 2 + Y ** 2))
+			# djdx = djdx1*self.T_vector[0] + djdx2*self.T_vector[1] + djdx3*self.T_vector[2]
+			# djdy = djdy1*self.T_vector[0] + djdy2*self.T_vector[1] + djdy3*self.T_vector[2]
 			# self.djdx = ((2*(np.sqrt(3)*Lt + 3*X)*(-1 + X/np.sqrt(X**2 + Y**2)) + 6*(-X + np.sqrt(X**2 + Y**2)))/((2* np.sqrt(Lt**2) * np.sqrt(-6*Y**2 + 2*( np.sqrt(3)*Lt + 3*X )*(-X + np.sqrt(X**2 + Y**2))))))*self.T_vector[0] +\
 			# (-((Lt - 2*np.sqrt (3)*np.sqrt (X**2 + Y**2))*(2*(np.sqrt (3)*Lt + 3*X)*(-1 + X/np.sqrt (X**2 + Y**2)) + 6*(-X + np.sqrt (X**2 + Y**2))))/(2*Lt**2*np.sqrt (-6*Y**2 + 2*(np.sqrt (3)*Lt + 3*X)*(-X + np.sqrt (X**2 + Y**2)))) + (2*np.sqrt (3)*X*np.sqrt (-6*Y**2 + 2*(np.sqrt (3)*Lt + 3*X)*(-X + np.sqrt (X**2 + Y**2))))/(Lt**2*np.sqrt (X**2 + Y**2)))*self.T_vector[1] +\
 			# (-((2* np.sqrt(3)*X))/( np.sqrt(Lt**2)* np.sqrt(X**2 + Y**2)))*self.T_vector[2]
