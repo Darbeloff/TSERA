@@ -6,6 +6,7 @@ pub = rospy.Publisher('/des_ort', Float32MultiArray, queue_size = 1)
 
 def cb(msg):
 	vector = msg.data.split()
+	print vector
 	X = float(vector[0])
 	Y = float(vector[1])
 	r = np.sqrt(X**2+Y**2)
@@ -14,6 +15,7 @@ def cb(msg):
 	if r == 0:
 		x = 0
 		y = 0
+		z_vec = 1
 	elif r >= r_corr:
 		scale = r_corr/r
 		x = scale*X

@@ -30,11 +30,6 @@ class poseClass():
 		self.y = y
 		self.z = z
 		self.updateB(Lt)
-	def updatelist(self, xyz):
-		if self.list[0] == 0:
-			self.list[0] = xyz
-		elif self.list[-1] == 0:
-			self.list[self.count] = xyz
 	def updatecount(self):
 		self.count += 1
 	def position(self):
@@ -57,7 +52,7 @@ class poseClass():
 		#Need to edit this section, figure out what to do around (0,0) and y = 0, algebraic expressions won't work. Potential for Abbas method of B_y to work, if not, need to trick it. 
 		elif (abs(self.y) < 0.1) != (abs(self.x) < 0.1):
 			djdx2 = ((Lt - 2*np.sqrt (3)*np.sqrt (X ** 2 + Y ** 2))*(2*(np.sqrt (3)*Lt + 3*X)*(-1 + X/np.sqrt(X ** 2 + Y ** 2)) + 6*(-X + np.sqrt(X ** 2 + Y ** 2))))/(2*Lt ** 2*np.sqrt (-6*Y ** 2 + 2*(np.sqrt (3)*Lt + 3*X)*(-X + np.sqrt (X ** 2 + Y ** 2)))) + (2*np.sqrt (3)*X*np.sqrt (-6*Y ** 2 + 2*(np.sqrt (3)*Lt + 3*X)*(-X + np.sqrt (X ** 2 + Y ** 2))))/(Lt ** 2*np.sqrt (X ** 2 + Y ** 2))
-			djdy2 = -((-12*Y + (2*(np.sqrt (3)*Lt + 3*X)*Y)/np.sqrt (X ** 2 + Y ** 2))*(Lt - 2*np.sqrt(3)*np.sqrt(X ** 2 + Y ** 2)))/(2*Lt ** 2*np.sqrt(-6*Y ** 2 + 2*(np.sqrt (3)*Lt + 3*X)*(-X + np.sqrt (X ** 2 + Y ** 2)))) + (2*np.sqrt (3)*Y*np.sqrt (-6*Y ** 2 + 2*(np.sqrt (3)*Lt + 3*X)*(-X + np.sqrt (X ** 2 + Y ** 2))))/(Lt ** 2*np.sqrt (X ** 2 + Y ** 2))
+			djdy2 = ((-12*Y + (2*(np.sqrt (3)*Lt + 3*X)*Y)/np.sqrt (X ** 2 + Y ** 2))*(Lt - 2*np.sqrt(3)*np.sqrt(X ** 2 + Y ** 2)))/(2*Lt ** 2*np.sqrt(-6*Y ** 2 + 2*(np.sqrt (3)*Lt + 3*X)*(-X + np.sqrt (X ** 2 + Y ** 2)))) + (2*np.sqrt (3)*Y*np.sqrt (-6*Y ** 2 + 2*(np.sqrt (3)*Lt + 3*X)*(-X + np.sqrt (X ** 2 + Y ** 2))))/(Lt ** 2*np.sqrt (X ** 2 + Y ** 2))
 			djdx = djdx1*self.T_vector[0] + djdx2*self.T_vector[1] + djdx3*self.T_vector[2]
 			djdy = djdy1*self.T_vector[0] + djdy2*self.T_vector[1] + djdy3*self.T_vector[2]
 			# self.djdx = ((2*(np.sqrt(3)*Lt + 3*X)*(-1 + X/np.sqrt(X**2 + Y**2)) + 6*(-X + np.sqrt(X**2 + Y**2)))/((2* np.sqrt(Lt**2) * np.sqrt(-6*Y**2 + 2*( np.sqrt(3)*Lt + 3*X )*(-X + np.sqrt(X**2 + Y**2))))))*self.T_vector[0] +\
@@ -71,8 +66,8 @@ class poseClass():
 			return [djdx, djdy, 2]
 		else:
 			#Not T_vector, but difference between B and T
-			djdx = self.T_vector[0]
-			djdy = self.T_vector[1]
+			djdx = self.T_vector[0] - self.b_vector[0]
+			djdy = self.T_vector[1] - self.b_vector[1]
 			return [djdx, djdy, 3]
 	def arrived(self):
 		self.list.pop(0)
@@ -156,9 +151,9 @@ def gradient_ascent(stage, unit_vector):
 		xyz = [pose1.x, pose1.y, pose1.z, pose2.x, pose2.y, pose2.z, pose3.x, pose3.y, pose3.z]
 		xyz_msg = Float32MultiArray(data = xyz)
 		ort_pub.publish(xyz_msg)
-		print new_x, new_y, new_z #, DJ[1], DJ[1], DJ[2], pose.b_vec()[0], pose.b_vec()[2], np.linalg.norm(np.cross(pose.b_vec(), pose.T()))
+		print new_x, new_y, pose.b_vec() #, DJ[1], DJ[1], DJ[2], pose.b_vec()[0], pose.b_vec()[2], np.linalg.norm(np.cross(pose.b_vec(), pose.T()))
 		step += 1
-		r.sleep()
+		#r.sleep()
 	print step
 
 	if continue_loop == True:
@@ -185,8 +180,8 @@ def gradient_ascent(stage, unit_vector):
 
 
 		ax = fig.gca(projection='3d')
-		X = np.linspace(-7, 7,100)
-		Y = np.linspace(-7, 7,100)
+		X = np.linspace(-11, 11,100)
+		Y = np.linspace(-11, 11,100)
 		X, Y = np.meshgrid(X,Y)
 		Z = np.zeros((len(X), len(Y)))
 		
