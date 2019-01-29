@@ -52,7 +52,30 @@ class poseClass():
 		#Need to edit this section, figure out what to do around (0,0) and y = 0, algebraic expressions won't work. Potential for Abbas method of B_y to work, if not, need to trick it. 
 		elif (abs(self.y) < 0.1) != (abs(self.x) < 0.1):
 			#derivative where b_y = np.sqrt(1-b_x**2-b_z**2)
-			
+			r = np.sqrt(X**2+Y**2)
+			bxn = (Lt -2*np.sqrt(3)*r)
+			bx = bxn/(np.sqrt(Lt)**2)
+			bz1 = (np.sqrt(3)*Lt+3*X)
+			bz2 = (-X+r)
+			bznum = (-6*Y**2 + 2*bz1*bz2)
+			bz = bznum/(Lt**2)
+			denom = 2*np.sqrt(1-bx**2-bz)
+			xn1 = (4*np.sqrt(3)*X*bxn)/((Lt**2)*r)
+			xn2 = ((2*bz1*(-1+X/r))+6*bz2)/(Lt**2)
+			numerx = xn1-xn2
+			djdx2 = numerx/denom
+
+			yn1 = (-(2*np.sqrt(3)*Y)/(r*np.sqrt(Lt**2)))**2
+			yn2 = ((bxn)/(np.sqrt(Lt**2)))**0
+			yn3 = ((-12*Y+((2*bz1*Y)/(r)))/(2*np.sqrt(Lt**2)*np.sqrt(bznum)))**2
+			yn4 = (np.sqrt(bz))**0
+
+			numery = -yn1-yn2-yn3-yn4
+			djdy2 = numery/denom
+
+			djdx = djdx1*self.T_vector[0] + djdx2*self.T_vector[1] + djdx3*self.T_vector[2]
+			djdy = djdy1*self.T_vector[0] + djdy2*self.T_vector[1] + djdy3*self.T_vector[2]
+			return [djdx, djdy, 2]
 			#derivative where b_y = -b_x*b_z
 			# djdx2 = -(((Lt - 2*np.sqrt (3)*np.sqrt (X ** 2 + Y ** 2))*(2*(np.sqrt (3)*Lt + 3*X)*(-1 + X/np.sqrt(X ** 2 + Y ** 2)) + 6*(-X + np.sqrt(X ** 2 + Y ** 2))))/(2*Lt ** 2*np.sqrt (-6*Y ** 2 + 2*(np.sqrt (3)*Lt + 3*X)*(-X + np.sqrt (X ** 2 + Y ** 2))))) + (2*np.sqrt (3)*X*np.sqrt (-6*Y ** 2 + 2*(np.sqrt (3)*Lt + 3*X)*(-X + np.sqrt (X ** 2 + Y ** 2))))/(Lt ** 2*np.sqrt (X ** 2 + Y ** 2))
 			# djdy2 = -(((-12*Y + (2*(np.sqrt (3)*Lt + 3*X)*Y)/np.sqrt (X ** 2 + Y ** 2))*(Lt - 2*np.sqrt(3)*np.sqrt(X ** 2 + Y ** 2)))/(2*Lt ** 2*np.sqrt(-6*Y ** 2 + 2*(np.sqrt (3)*Lt + 3*X)*(-X + np.sqrt (X ** 2 + Y ** 2))))) + (2*np.sqrt (3)*Y*np.sqrt (-6*Y ** 2 + 2*(np.sqrt (3)*Lt + 3*X)*(-X + np.sqrt (X ** 2 + Y ** 2))))/(Lt ** 2*np.sqrt (X ** 2 + Y ** 2))
