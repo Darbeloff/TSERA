@@ -29,6 +29,7 @@ class poseClass():
 		self.y = y
 		self.z = z
 		self.updateB(Lt)
+
 	def calc_dj(self, Lt):
 		X = self.x
 		Y = self.y
@@ -142,6 +143,7 @@ def gradient_ascent(stage, unit_vector):
 			continue_loop = False
 			break
 		DJ = pose.calc_dj(Lt)
+
 		if np.sign(djx) != np.sign (DJ[0]) and step > 0 and abs(pose.x) < 0.1:
 			new_x = pose.x + djx*alpha
 		else:
@@ -157,15 +159,16 @@ def gradient_ascent(stage, unit_vector):
 		xyz = [pose1.x, pose1.y, pose1.z, pose2.x, pose2.y, pose2.z, pose3.x, pose3.y, pose3.z]
 		xyz_msg = Float32MultiArray(data = xyz)
 		ort_pub.publish(xyz_msg)
+
 		print new_x, new_y, DJ[0], DJ[1], DJ[2] # pose.b_vec()[0], pose.b_vec()[2], np.linalg.norm(np.cross(pose.b_vec(), pose.T()))
 		step += 1
 		if step > 50000:
 			break
-		
 		#r.sleep()
 	print step
 
 	if continue_loop == True:
+
 		fig = plt.figure(1)
 		x = []
 		y = []
