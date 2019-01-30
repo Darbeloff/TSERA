@@ -67,7 +67,6 @@ private:
     //Position Setpoint and state
     float MotorPos;
     float desiredMotorPos = 0;
-
     //Position controller gains
     float Kpp = 5000.0;
     float Kdp = 0.0;
@@ -99,6 +98,6 @@ private:
 //Constants
 const float MAX_PWM = 1000;
 const float MIN_PWM = -1000;
-const float on_off_tolerance = 0.07;
+const float on_off_tolerance = 0.07; //units?
 
 #endif
