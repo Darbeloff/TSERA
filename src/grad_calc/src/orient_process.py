@@ -16,7 +16,7 @@ class poseClass():
 		self.stage = stage_
 		self.x = 0
 		self.y = 0
-		self.z = 92
+		self.z = 120
 		self.b_list = []
 		self.j_list = []
 		self.grad_cont = True
@@ -127,7 +127,7 @@ def gradient_ascent(stage, unit_vector):
 	new_x = 1
 	new_y = 1
 	new_z = 1
-	Lt = 85.3 #Need to calculate from CAD
+	Lt = 85.3
 	alpha = 0.1
 	prev_dj0 = 0
 	prev_dj1 = 0
@@ -157,16 +157,14 @@ def gradient_ascent(stage, unit_vector):
 	 	new_z = pose.z
 	 	pose.updateXYZ(new_x,new_y,new_z, Lt)
 		xyz = [pose1.x, pose1.y, pose1.z, pose2.x, pose2.y, pose2.z, pose3.x, pose3.y, pose3.z]
-		xyz_msg = Float32MultiArray(data = xyz)
-		ort_pub.publish(xyz_msg)
-
-		print new_x, new_y, DJ[0], DJ[1], DJ[2] # pose.b_vec()[0], pose.b_vec()[2], np.linalg.norm(np.cross(pose.b_vec(), pose.T()))
 		step += 1
 		if step > 50000:
+			print "im broken"
 			break
 		#r.sleep()
 	print step
-
+	xyz_msg = Float32MultiArray(data = xyz)
+	ort_pub.publish(xyz_msg)
 	if continue_loop == True:
 
 		fig = plt.figure(1)
@@ -195,7 +193,7 @@ def gradient_ascent(stage, unit_vector):
 		fig2 = plt.figure(2)
 		plt.contour(X,Y,Z,200)
 		plt.plot(x,y)
-		plt.show()
+		#plt.show()
 
 def ort_callback(msg):
 	T1 = [msg.data[0], msg.data[1], msg.data[2]]

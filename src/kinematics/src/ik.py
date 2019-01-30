@@ -13,7 +13,7 @@ class commandClass:
 		self.stage = stage_
 		self.x = 0
 		self.y = 0
-		self.z = 92
+		self.z = 120
 		self.command = ik_legs(self.x,self.y,self.z)
 	def updateXYZ(self,x,y,z):
 		self.x = x

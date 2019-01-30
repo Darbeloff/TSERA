@@ -21,12 +21,12 @@ motorClass m1b =  motorClass(9,32,48,45,gearRatio2, EncCntsRev2);
 motorClass m1c =  motorClass(11,30,46,47,gearRatio2, EncCntsRev2);
 
 //stage 2
-motorClass m2a =  motorClass(7,34,38,41,gearRatio1, EncCntsRev1);
-motorClass m2b =  motorClass(6,35,42,39,gearRatio1, EncCntsRev1);
-motorClass m2c =  motorClass(4,37,40,43,gearRatio1, EncCntsRev1);
+motorClass m2a =  motorClass(7,34,38,41,gearRatio2, EncCntsRev2);
+motorClass m2b =  motorClass(6,35,42,39,gearRatio2, EncCntsRev2);
+motorClass m2c =  motorClass(4,37,40,43,gearRatio2, EncCntsRev2);
 
 //stage 3
-motorClass m3a =  motorClass(2,29,22,25,gearRatio1, EncCntsRev2); //1-1
+motorClass m3a =  motorClass(2,29,22,25,gearRatio2, EncCntsRev2); //1-1
 motorClass m3b =  motorClass(3,28,24,23,gearRatio2, EncCntsRev2); //1-2
 motorClass m3c =  motorClass(10,31,26,27,gearRatio2, EncCntsRev2); //2-1
 

@@ -92,7 +92,7 @@ def ik_legs(x,y,z):
 		M = np.sqrt(2*(r - x)*(np.sqrt(3)*Lt + 3*x) - 6*y**2)
 		lb_L = L_b(x, y, z, Lt, s0, r, M, k)
 		lc_L = L_c(x, y, z, Lt, s0, r, M, k)
-
+	print (la_L, lb_L, lc_L)
 	legs = [width(la_L), width(lb_L), width(lc_L)]
 	return legs
 
