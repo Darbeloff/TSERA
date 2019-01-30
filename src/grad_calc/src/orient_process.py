@@ -17,7 +17,6 @@ class poseClass():
 		self.x = 0
 		self.y = 0
 		self.z = 92
-		self.count = 0
 		self.b_list = []
 		self.j_list = []
 		self.grad_cont = True
@@ -30,10 +29,6 @@ class poseClass():
 		self.y = y
 		self.z = z
 		self.updateB(Lt)
-	def updatecount(self):
-		self.count += 1
-	def position(self):
-		return self.count
 	def calc_dj(self, Lt):
 		X = self.x
 		Y = self.y
@@ -47,10 +42,11 @@ class poseClass():
 			djdy2 = ((-12*Y + (2*(np.sqrt (3)*Lt + 3*X)*Y)/np.sqrt (X ** 2 + Y ** 2))*(X + np.sqrt (X ** 2 + Y ** 2)))/(2*np.sqrt (Lt ** 2)*Y*np.sqrt (-6*Y ** 2 + 2*(np.sqrt (3)*Lt + 3*X)*(-X + np.sqrt (X ** 2 + Y ** 2)))) + np.sqrt (-6*Y ** 2 + 2*(np.sqrt (3)*Lt + 3*X)*(-X + np.sqrt (X ** 2 + Y ** 2)))/(np.sqrt (Lt ** 2)*np.sqrt (X ** 2 + Y ** 2)) - ((X + np.sqrt (X ** 2 + Y ** 2))*np.sqrt (-6*Y ** 2 + 2*(np.sqrt (3)*Lt + 3*X)*(-X + np.sqrt (X ** 2 + Y ** 2))))/(np.sqrt (Lt ** 2)*Y ** 2)
 			djdx = djdx1*self.T_vector[0] + djdx2*self.T_vector[1] + djdx3*self.T_vector[2]
 			djdy = djdy1*self.T_vector[0] + djdy2*self.T_vector[1] + djdy3*self.T_vector[2]
+			self.djdx = djdx
+			self.djdy = djdy			
 			return [djdx, djdy, 1]
 
-		#Need to edit this section, figure out what to do around (0,0) and y = 0, algebraic expressions won't work. Potential for Abbas method of B_y to work, if not, need to trick it. 
-		elif abs(self.y) >= 0.1 and self.x <= -0.1:
+		elif (abs(self.y) <= 0.1) != (self.x>-0.1):
 			#derivative where b_y = np.sqrt(1-b_x**2-b_z**2)
 			r = np.sqrt(X**2+Y**2)
 			a = X + r
@@ -60,58 +56,25 @@ class poseClass():
 			denominator = np.sqrt(2)*(Lt**2)*r*np.sqrt(denom_sqrt)
 
 			djdx2 = numeratorx/denominator
-			djdy2 = numeratory/denominator
-
-
-			# bxn = (Lt -2*np.sqrt(3)*r)
-			# bx = bxn/Lt
-			# bz1 = (np.sqrt(3)*Lt+3*X)
-			# bz2 = (-X+r)
-			# bznum = (-6*Y**2 + 2*bz1*bz2)
-			# bz = bznum/(Lt**2)
-			# denom = 2*np.sqrt(1-bx**2-bz)
-			# xn1 = (4*np.sqrt(3)*X*bxn)/((Lt**2)*r)
-			# xn2 = ((2*bz1*(-1+X/r))+6*bz2)/(Lt**2)
-			# numerx = xn1-xn2
-			# djdx2 = numerx/denom
-
-			# yn1 = (-(2*np.sqrt(3)*Y)/(r*np.sqrt(Lt**2)))**2
-			# yn2 = ((bxn)/(np.sqrt(Lt**2)))**0
-			# yn3 = ((-12*Y+((2*bz1*Y)/(r)))/(2*np.sqrt(Lt**2)*np.sqrt(bznum)))**2
-			# yn4 = (np.sqrt(bz))**0
-
-			# numery = -yn1-yn2-yn3-yn4
-			# djdy2 = numery/denom
+			djdy2 = (numeratory/denominator)
 
 			djdx = djdx1*self.T_vector[0] + djdx2*self.T_vector[1] + djdx3*self.T_vector[2]
 			djdy = djdy1*self.T_vector[0] + djdy2*self.T_vector[1] + djdy3*self.T_vector[2]
-			
-			return [djdx, djdy, 2]
-			#derivative where b_y = -b_x*b_z
-			# djdx2 = -(((Lt - 2*np.sqrt (3)*np.sqrt (X ** 2 + Y ** 2))*(2*(np.sqrt (3)*Lt + 3*X)*(-1 + X/np.sqrt(X ** 2 + Y ** 2)) + 6*(-X + np.sqrt(X ** 2 + Y ** 2))))/(2*Lt ** 2*np.sqrt (-6*Y ** 2 + 2*(np.sqrt (3)*Lt + 3*X)*(-X + np.sqrt (X ** 2 + Y ** 2))))) + (2*np.sqrt (3)*X*np.sqrt (-6*Y ** 2 + 2*(np.sqrt (3)*Lt + 3*X)*(-X + np.sqrt (X ** 2 + Y ** 2))))/(Lt ** 2*np.sqrt (X ** 2 + Y ** 2))
-			# djdy2 = -(((-12*Y + (2*(np.sqrt (3)*Lt + 3*X)*Y)/np.sqrt (X ** 2 + Y ** 2))*(Lt - 2*np.sqrt(3)*np.sqrt(X ** 2 + Y ** 2)))/(2*Lt ** 2*np.sqrt(-6*Y ** 2 + 2*(np.sqrt (3)*Lt + 3*X)*(-X + np.sqrt (X ** 2 + Y ** 2))))) + (2*np.sqrt (3)*Y*np.sqrt (-6*Y ** 2 + 2*(np.sqrt (3)*Lt + 3*X)*(-X + np.sqrt (X ** 2 + Y ** 2))))/(Lt ** 2*np.sqrt (X ** 2 + Y ** 2))
-			# djdx = djdx1*self.T_vector[0] + djdx2*self.T_vector[1] + djdx3*self.T_vector[2]
-			# djdy = djdy1*self.T_vector[0] + djdy2*self.T_vector[1] + djdy3*self.T_vector[2]
-			# self.djdx = ((2*(np.sqrt(3)*Lt + 3*X)*(-1 + X/np.sqrt(X**2 + Y**2)) + 6*(-X + np.sqrt(X**2 + Y**2)))/((2* np.sqrt(Lt**2) * np.sqrt(-6*Y**2 + 2*( np.sqrt(3)*Lt + 3*X )*(-X + np.sqrt(X**2 + Y**2))))))*self.T_vector[0] +\
-			# (-((Lt - 2*np.sqrt (3)*np.sqrt (X**2 + Y**2))*(2*(np.sqrt (3)*Lt + 3*X)*(-1 + X/np.sqrt (X**2 + Y**2)) + 6*(-X + np.sqrt (X**2 + Y**2))))/(2*Lt**2*np.sqrt (-6*Y**2 + 2*(np.sqrt (3)*Lt + 3*X)*(-X + np.sqrt (X**2 + Y**2)))) + (2*np.sqrt (3)*X*np.sqrt (-6*Y**2 + 2*(np.sqrt (3)*Lt + 3*X)*(-X + np.sqrt (X**2 + Y**2))))/(Lt**2*np.sqrt (X**2 + Y**2)))*self.T_vector[1] +\
-			# (-((2* np.sqrt(3)*X))/( np.sqrt(Lt**2)* np.sqrt(X**2 + Y**2)))*self.T_vector[2]
-
-			# self.djdy = (-12*Y + ((2*(np.sqrt(3)*Lt + 3*X)*Y)/ np.sqrt(X**2 + Y**2))/(2* np.sqrt(Lt**2)* np.sqrt(-6*Y**2 + 2*( np.sqrt(3)*Lt + 3*X)*(-X + np.sqrt(X**2 + Y**2))))) * self.T_vector[0] +\
-			# (-((-12*Y + (2*(np.sqrt (3)*Lt + 3*X)*Y)/np.sqrt (X**2 + Y**2))*(Lt - 2*np.sqrt (3)*np.sqrt (X**2 + Y**2)))/(2*Lt**2*np.sqrt (-6*Y**2 + 2*(np.sqrt (3)*Lt + 3*X)*(-X + np.sqrt (X**2 + Y**2)))) + (2*np.sqrt (3)*Y*np.sqrt (-6*Y**2 + 2*(np.sqrt (3)*Lt + 3*X)*(-X + np.sqrt (X**2 + Y**2))))/(Lt**2*np.sqrt (X**2 + Y**2))) * self.T_vector[1] +\
-			# ((-((2* np.sqrt(3)*Y)/( np.sqrt(Lt**2)* np.sqrt(X**2 + Y**2)))))*self.T_vector[2]
-			# print "small y: ", self.djdx, self.djdy
-			return [djdx, djdy, 2]
+			self.djdx = djdx
+			self.djdy = djdy
+			return [djdx, djdy, 2, djdy1, djdy2, djdy3]
 		else:
 			#Not T_vector, but difference between B and T
-			djdx = self.T_vector[0] - self.b_vector[0]
-			djdy = self.T_vector[1] - self.b_vector[1]
+			r = np.sqrt(self.x**2+self.y**2)
+			if self.djdy != 0:
+				djdy = np.sign(self.djdy)*np.log10(abs(self.djdy))
+				djdx = np.sign(self.djdx)*np.log10(abs(self.djdx))
+			else:
+				djdy = 1
+				djdx = 1
+			self.djdy = djdy
+			self.djdx = djdx
 			return [djdx, djdy, 3]
-	def arrived(self):
-		self.list.pop(0)
-		xyz_msg = Float32MultiArray(data = self.list[0])
-		ort_pub.publish(xyz_msg)
-	def cont(self):
-		return self.grad_cont
 	def updateT(self, vector):
 		if len(self.b_list) > 0:
 			del self.b_list[:]
@@ -170,6 +133,8 @@ def gradient_ascent(stage, unit_vector):
 	count = 0
 	past_t = pose.T()[:]
 	step = 0
+	djy = 0
+	djx = 0
 	r = rospy.Rate(100)
 	print "starting loop"
 	while continue_loop == True and np.linalg.norm(np.cross(pose.b_vec(), pose.T())) > 0.0048: #Current loop below can get below .005, which is an error of .865 cm
@@ -177,36 +142,31 @@ def gradient_ascent(stage, unit_vector):
 			continue_loop = False
 			break
 		DJ = pose.calc_dj(Lt)
-		# if np.linalg.norm(np.cross(pose.b_vec(), pose.T())) < 0.005 and count == 0:
-		# 	alpha = 0.01
-		# 	count += 1
-		# elif np.linalg.norm(np.cross(pose.b_vec(), pose.T())) < 0.003 and count  = 1
-	 	new_x = pose.x + DJ[0]*alpha
-	 	new_y = pose.y + DJ[1]*alpha
-	 	new_z = pose.z 
+		if np.sign(djx) != np.sign (DJ[0]) and step > 0 and abs(pose.x) < 0.1:
+			new_x = pose.x + djx*alpha
+		else:
+			new_x = pose.x +DJ[0]*alpha
+			djx = DJ[0]
+		if np.sign(djy) != np.sign(DJ[1]) and step > 0 and abs(pose.y) < 0.1:
+			new_y = pose.y + djy*alpha
+		else:
+	 		new_y = pose.y + DJ[1]*alpha 
+	 		djy = DJ[1]
+	 	new_z = pose.z
 	 	pose.updateXYZ(new_x,new_y,new_z, Lt)
 		xyz = [pose1.x, pose1.y, pose1.z, pose2.x, pose2.y, pose2.z, pose3.x, pose3.y, pose3.z]
 		xyz_msg = Float32MultiArray(data = xyz)
 		ort_pub.publish(xyz_msg)
-		print new_x, new_y, DJ[1], DJ[1], DJ[2] # pose.b_vec()[0], pose.b_vec()[2], np.linalg.norm(np.cross(pose.b_vec(), pose.T()))
+		print new_x, new_y, DJ[0], DJ[1], DJ[2] # pose.b_vec()[0], pose.b_vec()[2], np.linalg.norm(np.cross(pose.b_vec(), pose.T()))
 		step += 1
+		if step > 50000:
+			break
+		
 		#r.sleep()
 	print step
 
 	if continue_loop == True:
-		#vector_plot = np.array([[0,0,0,pose., b_y.subs([(x, position.x),(y,position.y), (Lt, 85.3)]), b_z.subs([(x, position.x),(y,position.y), (Lt, 85.3)])],[0, 0, 0, unit_vector[0], unit_vector[1], unit_vector[2]]])
-		# X, Y, Z, U, V, W = zip(*vector_plot)
 		fig = plt.figure(1)
-		# ax = fig.add_subplot(111, projection='3d')
-		# ax.quiver(U, V, W, X, Y, Z)
-		# ax.set_xlim([-1, 1])
-		# ax.set_ylim([-1, 1])
-		# ax.set_zlim([-1, 1])
-		# ax.set_xlabel('x')
-		# ax.set_ylabel('y')
-		# ax.set_zlabel('z')
-		# plt.show()
-		# plt.hold(True)
 		x = []
 		y = []
 		j = []
