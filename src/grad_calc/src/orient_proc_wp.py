@@ -19,11 +19,14 @@ class poseClass():
 		self.z = 120
 		self.b_list = []
 		self.j_list = []
+		self.t_list = [0]*10
+		self.xyz_list = [0]*10
 		self.grad_cont = True
 		self.T_vector = [0,0,1]
 		self.b_vector = [0,0,1]
 		self.djdx = 0
 		self.djdy = 0
+		self.step = 0
 	def updateXYZ(self,x,y,z, Lt):
 		self.x = x
 		self.y = y
@@ -74,10 +77,29 @@ class poseClass():
 			self.djdy = djdy
 			self.djdx = djdx
 			return [djdx, djdy, 3]
-	def updateT(self, vector):
-		if len(self.b_list) > 0:
-			del self.b_list[:]
-		self.T_vector = vector
+	def updateT(self,vector):
+		if vector != self.T_vector:
+			if len(self.b_list) > 0 or len(self.j_list) > 0:
+				del self.b_list[:]
+				del self.j_list[:]
+				del self.t_list[:]
+				self.step = 0
+			self.T_vector = vector
+			theta = np.arcsin(np.linalg.norm(np.cross(pose.b_vec(),self.T_vector)))
+			scale = np.sin((theta*(i+1)/10))/np.sin(theta)
+			b_vec = pose.b_vec()
+			for i in range(len(self.t_list)):
+				self.t_list[i] = [b_vec[0]+ scale*(self.T_vector[0]-b_vec[0]), b_vec[1]+ scale*(self.T_vector[1]-b_vec[1]), b_vec[2]+scale*(self.T_vector[2]-b_vec[2])] 			
+				xyz = gradient_ascent(self.stage, self.t_list[i])
+				self.xyz_list.append(xyz)
+				if i == 0:
+					xyz_msg = Float32MultiArray(data = xyz)
+					ort_pub.publish(xyz_msg)
+	def update_step(self):
+		if len(xyz_list) >0:
+			self.step += 1
+			xyz_msg = Float32MultiArray(data = self.xyz_list[step])
+			ort_pub.publish(xyz_msg)
 	def T(self):
 		return self.T_vector
 	def updateB(self, X, Y, Lt):
@@ -110,7 +132,7 @@ def J(x,y, unit_vector, Lt):
 	J = np.dot(b_vector,unit_vector)
 
 	return J
-def gradient_ascent(stage, unit_vector, post):
+def gradient_ascent(stage, unit_vector):
 	if stage == 1:
 		pose = pose1
 	elif stage == 2:
@@ -133,18 +155,17 @@ def gradient_ascent(stage, unit_vector, post):
 
 	#r = rospy.Rate(100)
 	print "starting loop"
-	while continue_loop == True:
+	while continue_loop == True and np.linalg.norm(np.cross(pose.b_vec(), pose.T())) > 0.0048:
 		if (pose.T() == past_t) == False:
 			continue_loop = False
 			break
 		DJ = pose.calc_dj(currentx, currenty, Lt, unit_vector)
-
-		if np.sign(djx) != np.sign (DJ[0]) and step > 0 and abs(pose.x) < 0.1:
+		if np.sign(djx) != np.sign (DJ[0]) and step > 0 and abs(currentx) < 0.1:
 			new_x = currentx + djx*alpha
 		else:
 			new_x = currentx +DJ[0]*alpha
 			djx = DJ[0]
-		if np.sign(djy) != np.sign(DJ[1]) and step > 0 and abs(pose.y) < 0.1:
+		if np.sign(djy) != np.sign(DJ[1]) and step > 0 and abs(currenty) < 0.1:
 			new_y = currenty + djy*alpha
 		else:
 	 		new_y = currenty + DJ[1]*alpha 
@@ -154,20 +175,17 @@ def gradient_ascent(stage, unit_vector, post):
 		currentx = new_x
 		currenty = new_y
 		currentz = new_z
-		if post == True:
-			pose.updateXYZ(new_x, new_y, new_z)
-			xyz = [pose1.x, pose1.y, pose1.z, pose2.x, pose2.y, pose2.z, pose3.x, pose3.y, pose3.z, 0]
-			xyz_msg = Float32MultiArray(data = xyz)
-			ort_pub.publish(xyz_msg)
+
 		#if x is small, then rotate and do gradient ascent again. perhaps in wp_setup
 		if step > 50000:
 			print "im broken"
 			break
 			# return "failed"
+		print step, DJ, past_t, unit_vector
 		#r.sleep()
-	return [currentx, currenty, currentz]
-
-
+	pose.updateXYZ(currentx, currenty, currentz)
+	xyz = [pose1.x, pose1.y, pose1.z, pose2.x, pose2.y, pose2.z, pose3.x, pose3.y, pose3.z, 0]
+	return xyz
 
 
 	# if continue_loop == True:
@@ -198,7 +216,8 @@ def gradient_ascent(stage, unit_vector, post):
 	# 	fig2 = plt.figure(2)
 	# 	plt.contour(X,Y,Z,200)
 	# 	plt.plot(x,y)
-	# 	#plt.show()
+	# 	plt.show()
+	return xyz
 
 def wp_setup(stage, T_vector):
 	if stage == 1:
@@ -209,17 +228,20 @@ def wp_setup(stage, T_vector):
 		pose = pose3
 
 	T= [0]*10
-	[Tx, Ty, Tz] = gradient_ascent(stage, T_vector, False)
 	theta = np.arcsin(np.linalg.norm(np.cross(pose.b_vec(),T_vector)))
-
+	print "completed first loop"
 	for i in range(10):
+		print "in for loop"
 		if (pose.T() == T_vector) == False:
 			break
-		scale = sin((theta*(i+1)/10))/sin(theta)
+		scale = np.sin((theta*(i+1)/10))/np.sin(theta)
 		b_vec = pose.b_vec()
 		T[i] = [b_vec[0]+ scale*(T_vector[0]-b_vec[0]), b_vec[1]+ scale*(T_vector[1]-b_vec[1]), b_vec[2]+scale*(T_vector[2]-b_vec[2])] 			
-		pose.updateT(T[i])
-		gradient_ascent(stage, T[i], True)
+		#pose.updateT(T[i])
+		xyz = gradient_ascent(stage, T[i])
+
+		#pose.updateXYZ
+
 
 def ort_callback(msg):
 	T1 = [msg.data[0], msg.data[1], msg.data[2]]
@@ -243,8 +265,11 @@ def pos_callback(msg):
 def waypoint_callback(msg):
 	if all(i < 0.07 for i in msg.data):
 		pose1.updateT(pose1.b_vec())
+		pose1.update_step()
 		pose2.updateT(pose2.b_vec())
+		pose2.update_step()
 		pose3.updateT(pose3.b_vec())
+		pose3.update_step()
 
 
 def orientation():
