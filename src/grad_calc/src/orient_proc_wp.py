@@ -85,21 +85,19 @@ class poseClass():
 				del self.t_list[:]
 				self.step = 0
 			self.T_vector = vector
-			theta = np.arcsin(np.linalg.norm(np.cross(pose.b_vec(),self.T_vector)))
+			theta = np.arcsin(np.linalg.norm(np.cross(self.b_vector,self.T_vector)))
 			scale = np.sin((theta*(i+1)/10))/np.sin(theta)
-			b_vec = pose.b_vec()
 			for i in range(len(self.t_list)):
-				self.t_list[i] = [b_vec[0]+ scale*(self.T_vector[0]-b_vec[0]), b_vec[1]+ scale*(self.T_vector[1]-b_vec[1]), b_vec[2]+scale*(self.T_vector[2]-b_vec[2])] 			
-				xyz = gradient_ascent(self.stage, self.t_list[i])
-				self.xyz_list.append(xyz)
+				self.t_list[i] = [self.b_vector[0]+ scale*(self.T_vector[0]-self.b_vector[0]), self.b_vector[1]+ scale*(self.T_vector[1]-self.b_vector[1]), self.b_vector[2]+scale*(self.T_vector[2]-self.b_vector[2])] 
 				if i == 0:
-					xyz_msg = Float32MultiArray(data = xyz)
-					ort_pub.publish(xyz_msg)
+					xyz = gradient_ascent(self.stage, self.t_list[i])
+					self.xyz_list.append(xyz)
+
 	def update_step(self):
-		if len(xyz_list) >0:
+		if len(self.xyz_list) >0 and len(self.xyz_list) != 10:
 			self.step += 1
-			xyz_msg = Float32MultiArray(data = self.xyz_list[step])
-			ort_pub.publish(xyz_msg)
+			xyz = gradient_ascent(self.stage, self.t_list[self.step])
+			self.xyz_list.append(xyz)
 	def T(self):
 		return self.T_vector
 	def updateB(self, X, Y, Lt):
@@ -185,6 +183,8 @@ def gradient_ascent(stage, unit_vector):
 		#r.sleep()
 	pose.updateXYZ(currentx, currenty, currentz)
 	xyz = [pose1.x, pose1.y, pose1.z, pose2.x, pose2.y, pose2.z, pose3.x, pose3.y, pose3.z, 0]
+	xyz_msg = Float32MultiArray(data = xyz)
+	ort_pub.publish(xyz_msg)
 	return xyz
 
 
@@ -264,11 +264,11 @@ def pos_callback(msg):
 
 def waypoint_callback(msg):
 	if all(i < 0.07 for i in msg.data):
-		pose1.updateT(pose1.b_vec())
+
 		pose1.update_step()
-		pose2.updateT(pose2.b_vec())
+
 		pose2.update_step()
-		pose3.updateT(pose3.b_vec())
+
 		pose3.update_step()
 
 
