@@ -86,15 +86,16 @@ class poseClass():
 				self.step = 0
 			self.T_vector = vector
 			theta = np.arcsin(np.linalg.norm(np.cross(self.b_vector,self.T_vector)))
-			scale = np.sin((theta*(i+1)/10))/np.sin(theta)
+			
 			for i in range(len(self.t_list)):
+				scale = np.sin((theta*(i+1)/10))/np.sin(theta)
 				self.t_list[i] = [self.b_vector[0]+ scale*(self.T_vector[0]-self.b_vector[0]), self.b_vector[1]+ scale*(self.T_vector[1]-self.b_vector[1]), self.b_vector[2]+scale*(self.T_vector[2]-self.b_vector[2])] 
 				if i == 0:
 					xyz = gradient_ascent(self.stage, self.t_list[i])
 					self.xyz_list.append(xyz)
 
 	def update_step(self):
-		if len(self.xyz_list) >0 and len(self.xyz_list) != 10:
+		if len(self.xyz_list) > 0 and len(self.xyz_list) != 10:
 			self.step += 1
 			xyz = gradient_ascent(self.stage, self.t_list[self.step])
 			self.xyz_list.append(xyz)
@@ -153,7 +154,7 @@ def gradient_ascent(stage, unit_vector):
 
 	#r = rospy.Rate(100)
 	print "starting loop"
-	while continue_loop == True and np.linalg.norm(np.cross(pose.b_vec(), pose.T())) > 0.0048:
+	while continue_loop == True:
 		if (pose.T() == past_t) == False:
 			continue_loop = False
 			break
@@ -181,7 +182,7 @@ def gradient_ascent(stage, unit_vector):
 			# return "failed"
 		print step, DJ, past_t, unit_vector
 		#r.sleep()
-	pose.updateXYZ(currentx, currenty, currentz)
+	pose.updateXYZ(currentx, currenty, currentz, Lt)
 	xyz = [pose1.x, pose1.y, pose1.z, pose2.x, pose2.y, pose2.z, pose3.x, pose3.y, pose3.z, 0]
 	xyz_msg = Float32MultiArray(data = xyz)
 	ort_pub.publish(xyz_msg)
@@ -249,13 +250,10 @@ def ort_callback(msg):
 	T3 = [msg.data[6], msg.data[7], msg.data[8]]
 	if msg.data[9] == 11.0:
 		pose1.updateT(T1)
-		wp_setup(1, T1)
 	elif msg.data[9] == 10.0:
 		pose2.updateT(T2)
-		wp_setup(2, T2)
 	elif msg.data[9] == 8.0:
-		pose3.updateT(T3)
-		wp_setup(3, T3)			
+		pose3.updateT(T3)		
 	
 def pos_callback(msg):
 	pose1.updateXYZ(msg.data[0], msg.data[1], msg.data[2])
@@ -263,13 +261,22 @@ def pos_callback(msg):
 	pose3.updateXYZ(msg.data[6], msg.data[7], msg.data[8])
 
 def waypoint_callback(msg):
-	if all(i < 0.07 for i in msg.data):
+	#for testing, receiving boolean
+	if msg.data == True:
+	 	pose1.update_step()
 
-		pose1.update_step()
+	 	pose2.update_step()
 
-		pose2.update_step()
+	 	pose3.update_step()
 
-		pose3.update_step()
+	#If error comes as a float32MultiArray, use this. Check that each motor is less than 0.7
+	# if all(i < 0.07 for i in msg.data):
+
+	# 	pose1.update_step()
+
+	# 	pose2.update_step()
+
+	# 	pose3.update_step()
 
 
 def orientation():
