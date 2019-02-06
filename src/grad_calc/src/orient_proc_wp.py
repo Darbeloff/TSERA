@@ -80,21 +80,20 @@ class poseClass():
 			return [djdx, djdy, 3]
 	def updateT(self, vector):
 		print "im updating"
-		if vector != self.T_vector:
-			self.T_vector = vector
-			print "ive changed!"
-			if len(self.b_list) > 0 or len(self.j_list) > 0:
-				del self.b_list[:]
-				del self.j_list[:]
-				self.t_list = [0]*10
-				self.step = 0
-			theta = np.arcsin(np.linalg.norm(np.cross(self.b_vector,self.T_vector)))
-			for i in range(len(self.t_list)):
-				scale = np.sin((theta*(i+1)/10))/np.sin(theta)
-				self.t_list[i] = [self.b_vector[0]+ scale*(self.T_vector[0]-self.b_vector[0]), self.b_vector[1]+ scale*(self.T_vector[1]-self.b_vector[1]), self.b_vector[2]+scale*(self.T_vector[2]-self.b_vector[2])] 
-				if i == 0:
-					xyz = gradient_ascent(self.stage, self.t_list[i])
-					self.xyz_list.append(xyz)
+		self.T_vector = vector
+		print "ive changed!"
+		if len(self.b_list) > 0 or len(self.j_list) > 0:
+			del self.b_list[:]
+			del self.j_list[:]
+			self.t_list = [0]*10
+			self.step = 0
+		theta = np.arcsin(np.linalg.norm(np.cross(self.b_vector,self.T_vector)))
+		for i in range(len(self.t_list)):
+			scale = np.sin((theta*(i+1)/10))/np.sin(theta)
+			self.t_list[i] = [self.b_vector[0]+ scale*(self.T_vector[0]-self.b_vector[0]), self.b_vector[1]+ scale*(self.T_vector[1]-self.b_vector[1]), self.b_vector[2]+scale*(self.T_vector[2]-self.b_vector[2])] 
+			if i == 0:
+				xyz = gradient_ascent(self.stage, self.t_list[i])
+				self.xyz_list.append(xyz)
 
 	def update_step(self):
 		if len(self.xyz_list) > 0 and len(self.xyz_list) != 10:
@@ -188,6 +187,7 @@ def gradient_ascent(stage, unit_vector):
 			# return "failed"
 		r.sleep()
 	
+		xyz = [pose1.x, pose1.y, pose1.z, pose2.x, pose2.y, pose2.z, pose3.x, pose3.y, pose3.z, 0]
 	if continue_loop == True:
 		pose.updateXYZ(currentx, currenty, currentz, Lt)
 		xyz = [pose1.x, pose1.y, pose1.z, pose2.x, pose2.y, pose2.z, pose3.x, pose3.y, pose3.z, 0]
@@ -252,8 +252,6 @@ def gradient_ascent(stage, unit_vector):
 
 def ort_callback(msg):
 	print "ort T received"
-	new_one = 1
-
 	T1 = [msg.data[0], msg.data[1], msg.data[2]]
 	T2 = [msg.data[3], msg.data[4], msg.data[5]]
 	T3 = [msg.data[6], msg.data[7], msg.data[8]]
@@ -269,6 +267,19 @@ def pos_callback(msg):
 	pose1.updateXYZ(msg.data[0], msg.data[1], msg.data[2])
 	pose2.updateXYZ(msg.data[3], msg.data[4], msg.data[5])
 	pose3.updateXYZ(msg.data[6], msg.data[7], msg.data[8])
+
+def vec_callback(msg):
+	print "vec T received"
+	T1 = [msg.data[0], msg.data[1], msg.data[2]]
+	T2 = [msg.data[3], msg.data[4], msg.data[5]]
+	T3 = [msg.data[6], msg.data[7], msg.data[8]]
+	if msg.data[9] == 11.0 and pose1.T() != T1:
+		pose1.checkT(T1)
+	elif msg.data[9] == 10.0 and pose2.T() != T2:
+		pose2.checkT(T2)
+	elif msg.data[9] == 8.0 and pose3.T() != T3:
+		print "vec T sent"
+		pose3.checkT(T3)		
 
 def waypoint_callback(msg):
 	#for testing, receiving boolean
@@ -291,6 +302,7 @@ def waypoint_callback(msg):
 def orientation():
 	rospy.init_node('grad_calc')
 	rospy.Subscriber("/des_ort", Float32MultiArray, ort_callback)
+	rospy.Subscriber("/new_vector", Float32MultiArray, vec_callback)
 	rospy.Subscriber("/continueWaypoint", Bool, waypoint_callback)
 	rospy.Subscriber("/des_pos", Float32MultiArray, pos_callback)
 	rospy.spin()

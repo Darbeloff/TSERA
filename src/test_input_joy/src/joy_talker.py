@@ -3,7 +3,7 @@ import rospy
 from std_msgs.msg import Float32MultiArray, String
 import numpy as np
 pub = rospy.Publisher('/des_ort', Float32MultiArray, queue_size = 1)
-
+pub2 = rospy.Publisher('new_vector', Float32MultiArray, queue_size = 1)
 def cb(msg):
 	vector = msg.data.split()
 	print vector
@@ -29,6 +29,7 @@ def cb(msg):
 	vector_list = [0,0,1,0,0,1,x,y,z_vec, 8]
 	vector_msg = Float32MultiArray(data = vector_list)
 	pub.publish(vector_msg)
+	pub2.publish(vector_msg)
 
 def talker():
 	rospy.init_node('test_talker')
