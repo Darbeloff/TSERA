@@ -29,8 +29,8 @@ def L_c(x, y, z, Lt, s0, r, M, k):
 
 
 def constrain_leg_width(rotations):
-	rot_min = 0.0; #revolutions
-	rot_max = 55.0; #revolutions, approx value
+	rot_min = 0; #revolutions
+	rot_max = 43.13/4.0 #revolutions
 	if rotations >= rot_max:
 		return rot_max
 	elif rotations<=rot_min:
@@ -38,9 +38,9 @@ def constrain_leg_width(rotations):
 	else:
 		return rotations
 
-lo = 42.0
-le = 5*42.0 # sum of all scissor lengths (minus offset)
-lb = 4.0 # length of offset
+lo = 30
+le = 42.5  + 85 + 42.5+ 30 # sum of all scissor lengths (minus offset)
+lb = 4 # length of offset
 
 def width(L_model):
 	ball_joint_offset =15 #mm measured
@@ -50,11 +50,12 @@ def width(L_model):
 	#Lmax = 175.33
 	#Lmin = 91.433
 
-	w = 2.0/(lb**2+le**2)*( (lb**2 + lo*le)*np.sqrt(lb**2+le**2-L**2) - L*lb*(le-lo) ) #mm 
+	w = 2/(lb**2+le**2)*( (lb**2 + lo*le)*np.sqrt(lb**2+le**2-L**2) - L*lb*(le-lo) ) #mm
+
 	#convert to revolutions of the motor shaft
-	lead = 1.0 #mm/revolution of the motor output shaft
-	gap = 90.4 #mm from CAD
-	hinge_hole_to_outer_edge = 4.5 ## mm measured value
+	lead = (1.0/20)*25.4 #mm/revolution of the motor output shaft
+	gap = 67.47 #mm from CAD
+	hinge_hole_to_outer_edge = 8.54 ## mm measured value
 	width_max = gap - 2*(hinge_hole_to_outer_edge) 
 	#width_min = 23 #mm measured value
 	revolutions = (width_max -  w)/(2*lead)
@@ -71,7 +72,7 @@ def ik_legs(x,y,z):
 
 	'''
 	Lt = 85.3 #mm fill in new values with spherical joint
-	s0 = 70 #mm
+	s0 = 33.23 #mm
 
 	r = np.sqrt(x**2 + y**2)
 	la_L = L_a( x,y, z, Lt, s0, r)
@@ -86,13 +87,12 @@ def ik_legs(x,y,z):
 		M = np.sqrt(2*(r - x)*(np.sqrt(3)*Lt + 3*x) - 6.0*y**2.0)
 		lb_L = L_b(x, y, z, Lt, s0, r, M, k)
 		lc_L = L_c(x, y, z, Lt, s0, r, M, k)
-		#use simpler kinematic equations
 	else:
 		k = np.sqrt(-3*y**2 + (np.sqrt(3)*Lt + 3*x)*(-x + r))
 		M = np.sqrt(2*(r - x)*(np.sqrt(3)*Lt + 3*x) - 6*y**2)
 		lb_L = L_b(x, y, z, Lt, s0, r, M, k)
 		lc_L = L_c(x, y, z, Lt, s0, r, M, k)
-	print la_L, lb_L, lc_L
+	print (la_L, lb_L, lc_L)
 	legs = [width(la_L), width(lb_L), width(lc_L)]
 	return legs
 
