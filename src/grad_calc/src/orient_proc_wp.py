@@ -8,6 +8,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
 import time
 new_one = 0
+
 ort_pub = rospy.Publisher("/des_ort_xyz", Float32MultiArray, queue_size = 1)
 # continue_loop = True
 Lt = 85.3
@@ -252,6 +253,7 @@ def gradient_ascent(stage, unit_vector):
 def ort_callback(msg):
 	print "ort T received"
 	new_one = 1
+
 	T1 = [msg.data[0], msg.data[1], msg.data[2]]
 	T2 = [msg.data[3], msg.data[4], msg.data[5]]
 	T3 = [msg.data[6], msg.data[7], msg.data[8]]
