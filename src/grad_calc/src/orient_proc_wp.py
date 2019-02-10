@@ -2,11 +2,11 @@
 import rospy
 from std_msgs.msg import Float32MultiArray, Bool
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
 from matplotlib import cm
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-from matplotlib.ticker import LinearLocator, FormatStrFormatter
-import time
 new_one = 0
 
 ort_pub = rospy.Publisher("/des_ort_xyz", Float32MultiArray, queue_size = 1)
@@ -154,6 +154,41 @@ def J(x,y, unit_vector, Lt):
 	J = np.dot(b_vector,unit_vector)
 
 	return J
+
+def graph_check(stage):
+	if stage == 1:
+		pose = pose1
+	elif stage == 2:
+		pose = pose2
+	else:
+		pose = pose3
+
+	fig = plt.figure(1)
+	x = []
+	y = []
+	j = []
+	for m in range(len(pose.j_list)):
+		x.append(pose.j_list[m][0])
+		y.append(pose.j_list[m][1])
+		j.append(J(pose.j_list[m][0],pose.j_list[m][1],pose.T(), Lt))
+
+	print x, y, j
+
+	ax = fig.gca(projection='3d')
+	X = np.linspace(-11, 11,100)
+	Y = np.linspace(-11, 11,100)
+	X, Y = np.meshgrid(X,Y)
+	Z = np.zeros((len(X), len(Y)))
+	for k in range(len(X)):
+		for m in range(len(Y)):
+			Z[k,m] = J(X[k,m], Y[k,m], pose.T(), Lt)
+	ax.plot3D(x,y,j, 'black')
+	surf = ax.plot_surface(X,Y,Z,rstride=1, cmap = cm.RdBu, linewidth = 0, antialiased = False)
+	fig2 = plt.figure(2)
+	plt.contour(X,Y,Z,200)
+	plt.plot(x,y)
+	plt.show()
+
 def gradient_ascent(stage, unit_vector):
 	if stage == 1:
 		pose = pose1
@@ -267,35 +302,8 @@ def gradient_ascent(stage, unit_vector):
 	xyz_msg = Float32MultiArray(data = xyz)
 	ort_pub.publish(xyz_msg)
 
-	# if continue_loop == True:
-
-	# 	fig = plt.figure(1)
-	# 	x = []
-	# 	y = []
-	# 	j = []
-	# 	for m in range(len(pose.j_list)):
-	# 		x.append(pose.j_list[m][0])
-	# 		y.append(pose.j_list[m][1])
-	# 		j.append(J(pose.j_list[m][0],pose.j_list[m][1],unit_vector, Lt))
-
-
-	# 	ax = fig.gca(projection='3d')
-	# 	X = np.linspace(-11, 11,100)
-	# 	Y = np.linspace(-11, 11,100)
-	# 	X, Y = np.meshgrid(X,Y)
-	# 	Z = np.zeros((len(X), len(Y)))
-		
-	# 	for k in range(len(X)):
-	# 		for m in range(len(Y)):
-	# 			Z[k,m] = J(X[k,m], Y[k,m], unit_vector, Lt)
-
-	# 	ax.plot3D(x,y,j, 'black')
-	# 	surf = ax.plot_surface(X,Y,Z,rstride=1, cmap = cm.RdBu, linewidth = 0, antialiased = False)
-
-	# 	fig2 = plt.figure(2)
-	# 	plt.contour(X,Y,Z,200)
-	# 	plt.plot(x,y)
-	# 	plt.show()
+	if pose.step == 9:
+		graph_check(stage)
 	return xyz
 
 # def wp_setup(stage, T_vector):
