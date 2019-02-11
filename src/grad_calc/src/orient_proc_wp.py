@@ -3,14 +3,13 @@ import rospy
 from std_msgs.msg import Float32MultiArray, Bool
 import numpy as np
 import matplotlib
-matplotlib.use('Agg')
+matplotlib.use('TkAgg')
 from matplotlib import cm
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 new_one = 0
 
 ort_pub = rospy.Publisher("/des_ort_xyz", Float32MultiArray, queue_size = 1)
-# continue_loop = True
 Lt = 85.3
 class poseClass():
 	def __init__(self, stage_):
@@ -85,8 +84,8 @@ class poseClass():
 		self.wait = False
 		print "ive changed!"
 		if len(self.b_list) > 0 or len(self.j_list) > 0:
-			del self.b_list[:]
-			del self.j_list[:]
+			# del self.b_list[:]
+			# del self.j_list[:]
 			self.t_list = [0]*10
 			self.step = 0
 		theta = np.arcsin(np.linalg.norm(np.cross(self.b_vector,self.T_vector)))
@@ -156,6 +155,7 @@ def J(x,y, unit_vector, Lt):
 	return J
 
 def graph_check(stage):
+	plt.close('all')
 	if stage == 1:
 		pose = pose1
 	elif stage == 2:
@@ -184,10 +184,12 @@ def graph_check(stage):
 			Z[k,m] = J(X[k,m], Y[k,m], pose.T(), Lt)
 	ax.plot3D(x,y,j, 'black')
 	surf = ax.plot_surface(X,Y,Z,rstride=1, cmap = cm.RdBu, linewidth = 0, antialiased = False)
-	fig2 = plt.figure(2)
-	plt.contour(X,Y,Z,200)
-	plt.plot(x,y)
 	plt.show()
+
+	# fig2 = plt.figure(2)
+	# plt.contour(X,Y,Z,200)
+	# plt.plot(x,y)
+	# plt.show()
 
 def gradient_ascent(stage, unit_vector):
 	if stage == 1:
@@ -302,8 +304,8 @@ def gradient_ascent(stage, unit_vector):
 	xyz_msg = Float32MultiArray(data = xyz)
 	ort_pub.publish(xyz_msg)
 
-	if pose.step == 9:
-		graph_check(stage)
+	# if pose.step == 9:
+	# 	graph_check(stage)
 	return xyz
 
 # def wp_setup(stage, T_vector):
