@@ -200,7 +200,7 @@ def gradient_ascent(stage, unit_vector):
 		pose = pose3
 	
 	continue_loop = True
-	rotate = False
+	rotate = 0
 	failed = False
 	currentx = pose.x
 	currenty = pose.y
@@ -244,19 +244,24 @@ def gradient_ascent(stage, unit_vector):
 		if step > 50000:
 			print "im broken"
 			continue_loop = False
-			rotate = True
+			rotate = 1
 			break
 			# return "failed"
 		#r.sleep()
 	if continue_loop == True:
 		pose.updateXYZ(currentx, currenty, currentz, Lt)
-	elif rotate == True:
+	elif rotate == 1:
 		#run while loop again by multiplying T, xyz, and b by rotation matrix
 		#send xyz with a 1 at the end of the list for rotation 
+		#if close to 0, rotation will still be in the small radius near 0
+		print step, pose.step, pose.x, pose.y, pose.z, "before rotation"
 		continue_loop = True
-		currentx = pose.x*-0.5+pose.y*np.sin(120/180*np.pi())
-		currenty = -pose.x*np.sin(120/180*np.pi())+pose.y*0.5
+		currentx = pose.x*-0.5+pose.y*np.sin(120/180*np.pi)
+		currenty = -pose.x*np.sin(120/180*np.pi)+pose.y*0.5
 		currentz = pose.z
+		print step, pose.step, currentx, currenty, currentz, "after rotation"
+		#need to rotate T
+		#need to check if x, y, and z rotation correct
 		new_x = 1
 		new_y = 1
 		new_z = 1
@@ -289,18 +294,19 @@ def gradient_ascent(stage, unit_vector):
 			currenty = new_y
 			currentz = new_z
 			cross = crossb(currentx, currenty, unit_vector, Lt)
-			print step, pose.T(), past_t
+			print step, pose.step, currentx, currenty, currentz
 			#if x is small, then rotate and do gradient ascent again. perhaps in wp_setup
 			if step > 50000:
 				print "im broken"
 				continue_loop = False
 				failed = True
 				break
-				# return "failed"
 			r.sleep()
+				# return "failed"
 		if failed == False:
 			pose.updateXYZ(currentx, currenty, currentz, Lt)
-	xyz = [pose1.x, pose1.y, pose1.z, pose2.x, pose2.y, pose2.z, pose3.x, pose3.y, pose3.z, 0]
+
+	xyz = [pose1.x, pose1.y, pose1.z, pose2.x, pose2.y, pose2.z, pose3.x, pose3.y, pose3.z, rotate]
 	xyz_msg = Float32MultiArray(data = xyz)
 	ort_pub.publish(xyz_msg)
 
