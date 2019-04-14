@@ -34,6 +34,7 @@ motorClass m3c =  motorClass(10,31,26,27,gearRatio2, EncCntsRev2); //2-1
 
 int vel_or_pos = 1; //position control
 int calibrated = 0;//initially not calibrated
+int send_count = 1;
 float epsilon = 0.07;
 
 void command_callback(const std_msgs::Float32MultiArray &setpoint){
@@ -49,7 +50,7 @@ void command_callback(const std_msgs::Float32MultiArray &setpoint){
     m3a.setMotorPos(setpoint.data[6]);
     m3b.setMotorPos(setpoint.data[7]);
     m3c.setMotorPos(setpoint.data[8]);
-   
+   send_count = 0;
 }
 
 
@@ -118,10 +119,12 @@ void loop (){
 //    m1a.pos_closedLoopController();
 //    m1b.pos_closedLoopController();
 //    m1c.pos_closedLoopController();
-      if(ROS_switch && Error_switch){ //Error Switch is set to stage 
+
+      if(ROS_switch && Error_switch && send_count == 0){ //Error Switch is set to stage 
         if ((sqrt(pow(m3a.errorPos,2)+ pow(m3b.errorPos,2)+ pow(m3c.errorPos,2)))< epsilon){
             ready_next.data = true;
             error_check.publish( &ready_next );
+            send_count = 1;
           }
           
       squareError_msg.data[0] = m3a.errorPos;
