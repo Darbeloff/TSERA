@@ -14,13 +14,15 @@ class commandClass:
 		self.x = 0
 		self.y = 0
 		self.z = 120
-		self.command = ik_legs(self.x,self.y,self.z)
-	def updateXYZ(self,x,y,z):
+		self.rotated = 0
+		self.command = ik_legs(self.x,self.y,self.z, self.rotated)
+	def updateXYZ(self,x,y,z,rotated):
 		self.x = x
 		self.y = y
 		self.z = z
+		self.rotated = rotated
 	def updateCommand(self):
-		self.command = ik_legs(self.x,self.y,self.z)
+		self.command = ik_legs(self.x,self.y,self.z, self.rotated)
 	def getCommand(self):
 		return self.command
 	def getStage(self):
@@ -55,7 +57,23 @@ def ik_cb(msg):
 	ik_pub.publish(command_msg)
 
 def ik_ort_cb(msg):
-	1==1
+	global command
+
+	command1.updateXYZ(msg.data[0], msg.data[1], msg.data[2], msg.data[3])
+	command1.updateCommand()
+	command2.updateXYZ(msg.data[4], msg.data[5], msg.data[6], msg.data[7])
+	command2.updateCommand()
+	command3.updateXYZ(msg.data[8], msg.data[9], msg.data[10], msg.data[11])
+	command3.updateCommand()
+
+	command[0:3] = command1.getCommand()
+	command[3:6] = command2.getCommand()
+	command[6:] = command3.getCommand()
+
+
+
+	command_msg = Float32MultiArray(data = command)
+	ik_pub.publish(command_msg)	
 
 def ik():
 	print "Inverse Kinematics Calculating..."

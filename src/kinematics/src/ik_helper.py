@@ -64,7 +64,7 @@ def width(L_model):
 
 
 
-def ik_legs(x,y,z):
+def ik_legs(x,y,z,rotated):
 	'''
 	takes x,y,z coordinate in segment base frame and 
 	calculates required leg lengths
@@ -93,7 +93,10 @@ def ik_legs(x,y,z):
 		lb_L = L_b(x, y, z, Lt, s0, r, M, k)
 		lc_L = L_c(x, y, z, Lt, s0, r, M, k)
 	print la_L, lb_L, lc_L
-	legs = [width(la_L), width(lb_L), width(lc_L)]
+	if rotated == 1:
+		legs = [width(lb_L), width(lc_L), width(la_L)]
+	else:
+		legs = [width(la_L), width(lb_L), width(lc_L)]
 	return legs
 
 
