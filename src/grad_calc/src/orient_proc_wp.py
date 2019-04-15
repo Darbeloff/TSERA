@@ -107,32 +107,19 @@ class poseClass():
 				self.wait = True
 				break
 			if self.quit_loop == True:
-				err_msg = "Gradient Ascent failed on step_calc = " + self.step_calc
+				err_msg = "Gradient Ascent failed on step_calc = " + str(self.step_calc)
 				error_pub.publish(err_msg)
 				break
 
 	def update_step(self):
-		# try:
-		# 	step = 10 - self.step_list[::-1].index(1)
-		# except ValueError: 
-		# 	step = 0
-		# if step <= self.step:
-		# 	self.first = True
 		
 		if self.quit_loop == True:
 			#Gradient ascent and rotation didn't work
 			if self.step == self.step_calc-1:
-				self.step = 0
 				self.wait = True
 				err_msg = "Robot has reached final calculated step."
 				error_pub.publish(err_msg)
-
-		elif self.step == self.step_calc:
-			#robot got to waypoint before the next one is ready
-			self.send = True
-			self.step += 1		
-
-		elif self.step < 9 and self.wait == False: # and self.step_list[self.step+1] == 1:
+		elif self.step < 9 and self.xyz_list[self.step+1] != 0: # and self.step_list[self.step+1] == 1:
 			self.step += 1
 			if self.xyz_list[self.step] != "failed":
 				print self.step
@@ -140,11 +127,9 @@ class poseClass():
 				xyz_msg = Float32MultiArray(data = xyz)
 				ort_pub.publish(xyz_msg)
 			else:
-				self.step = 0
 				self.wait = True
 				#a bit redundant, but fail safe in case somehow we get to next wp but its a failed one 
 		else:
-			self.step = 0
 			self.wait = True
 
 		#instead of publish and then run the next step, run all the steps and just send the next point once it reaches

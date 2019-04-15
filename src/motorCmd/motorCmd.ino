@@ -119,8 +119,9 @@ void loop (){
 //    m1b.pos_closedLoopController();
 //    m1c.pos_closedLoopController();
 
+//potentially have it send only once per waypoint?
       if(ROS_switch && Error_switch){ //Error Switch is set to stage 
-        if ((sqrt(pow(m3a.errorPos,2)+ pow(m3b.errorPos,2)+ pow(m3c.errorPos,2)))< epsilon){
+        if ((sqrt(pow(m3a.errorPos,2)+ pow(m3b.errorPos,2)+ pow(m3c.errorPos,2)))< epsilon && (sqrt(pow(m3a.errorPos,2)+ pow(m3b.errorPos,2)+ pow(m3c.errorPos,2)))> 0){
             ready_next.data = true;
             error_check.publish( &ready_next );
           }

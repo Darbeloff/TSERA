@@ -58,7 +58,7 @@ def ik_cb(msg):
 
 def ik_ort_cb(msg):
 	global command
-
+	#Need to add way to not accept incorrect inputs
 	command1.updateXYZ(msg.data[0], msg.data[1], msg.data[2], msg.data[3])
 	command1.updateCommand()
 	command2.updateXYZ(msg.data[4], msg.data[5], msg.data[6], msg.data[7])
@@ -70,8 +70,6 @@ def ik_ort_cb(msg):
 	command[3:6] = command2.getCommand()
 	command[6:] = command3.getCommand()
 
-
-
 	command_msg = Float32MultiArray(data = command)
 	ik_pub.publish(command_msg)	
 
@@ -79,7 +77,7 @@ def ik():
 	print "Inverse Kinematics Calculating..."
 	rospy.init_node('ik')
 	rospy.Subscriber('/des_pos', Float32MultiArray, ik_cb )
-	rospy.Subscriber('/des_ort_xyz', Float32MultiArray, ik_cb )
+	rospy.Subscriber('/des_ort_xyz', Float32MultiArray, ik_ort_cb )
 	rospy.spin()
 
 if __name__ == '__main__':
