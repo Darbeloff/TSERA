@@ -34,7 +34,7 @@ motorClass m3c =  motorClass(10,31,26,27,gearRatio2, EncCntsRev2); //2-1
 
 int vel_or_pos = 1; //position control
 int calibrated = 0;//initially not calibrated
-float epsilon = 0.07;
+float epsilon = 0.01;
 
 
 void command_callback(const std_msgs::Float32MultiArray &setpoint){
@@ -137,7 +137,7 @@ void loop (){
       squareError_msg.data[8] = m3c.errorPos; 
       squareErrorPub.publish( &squareError_msg );
       ArduinoInterface.spinOnce();
-      delay(1000);
+      delay(100);
         }
     else{
     m3c.log_on_off();

@@ -21,13 +21,13 @@ void motorClass::pos_on_off_controller(void){
     tol = on_off_tolerance;
    }
   if(errorPos>(2*tol)){
-    forward(_dirPin,_pwmPin,255);
+    forward(_dirPin,_pwmPin,175);
    }
   else if((errorPos>tol) && (errorPos<(2*tol))){
     forward(_dirPin,_pwmPin,85);
    }   
    else if(errorPos<-(2*tol)){
-    backward(_dirPin,_pwmPin,255);
+    backward(_dirPin,_pwmPin,175);
    }
    else if((errorPos<-tol) && (errorPos>-(2*tol))){
     backward(_dirPin,_pwmPin,85);

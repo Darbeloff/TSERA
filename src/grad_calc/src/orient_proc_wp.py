@@ -274,7 +274,7 @@ def gradient_ascent(stage, unit_vector, i):
 
 
 		#if x is small, then rotate and do gradient ascent again. perhaps in wp_setup
-		if step > 50000:
+		if step > 10000:
 			print "im broken"
 			continue_loop = False
 			rotate = 1
@@ -337,7 +337,7 @@ def gradient_ascent(stage, unit_vector, i):
 			xyz = [pose1.x, pose1.y, pose1.z, pose2.x, pose2.y, pose2.z, pose3.x, pose3.y, pose3.z, rotate]
 			xyz_msg = Float32MultiArray(data = xyz)
 			ort_pub.publish(xyz_msg)
-			if step > 50000:
+			if step > 10000:
 				print "im broken"
 				continue_loop = False
 				failed = True
