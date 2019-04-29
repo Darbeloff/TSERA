@@ -212,14 +212,25 @@ def graph_check(stage):
 	for k in range(len(X)):
 		for m in range(len(Y)):
 			Z[k,m] = J(X[k,m], Y[k,m], pose.T(), Lt)
-	ax.plot3D(x,y,j, 'black')
+	ax.plot3D(x,y,j, 'black', label = "TSERA Path")
 	surf = ax.plot_surface(X,Y,Z,rstride=1, cmap = cm.RdBu, linewidth = 0, antialiased = False)
+	title = "Cost Surface for T = [0.579, 0.579, 0.573]"
+	ax.text2D(0.05, 0.95, title, transform=ax.transAxes)
+	#ax.title("Cost Surface for T = [0.579, 0.579, 0.573")
+	ax.set_xlabel("X [cm]")
+	ax.set_ylabel("Y [cm]")
+	ax.set_zlabel("Z [cm]")
+	ax.legend()
 	plt.show()
 
-	# fig2 = plt.figure(2)
-	# plt.contour(X,Y,Z,200)
-	# plt.plot(x,y)
-	# plt.show()
+	fig2 = plt.figure(2)
+	plt.contour(X,Y,Z,200)
+	plt.title(title)
+	plt.xlabel("X [cm]")
+	plt.ylabel("Y [cm]")
+	plt.plot(x,y, label = "TSERA Path")
+	plt.legend()
+	plt.show()
 
 def gradient_ascent(stage, unit_vector, i):
 	if stage == 1:
@@ -274,7 +285,7 @@ def gradient_ascent(stage, unit_vector, i):
 
 
 		#if x is small, then rotate and do gradient ascent again. perhaps in wp_setup
-		if step > 10000:
+		if step > 50000:
 			print "im broken"
 			continue_loop = False
 			rotate = 1
@@ -337,7 +348,7 @@ def gradient_ascent(stage, unit_vector, i):
 			xyz = [pose1.x, pose1.y, pose1.z, pose2.x, pose2.y, pose2.z, pose3.x, pose3.y, pose3.z, rotate]
 			xyz_msg = Float32MultiArray(data = xyz)
 			ort_pub.publish(xyz_msg)
-			if step > 10000:
+			if step > 50000:
 				print "im broken"
 				continue_loop = False
 				failed = True
@@ -355,6 +366,8 @@ def gradient_ascent(stage, unit_vector, i):
 	else:
 		pose.quit_loop = True
 		xyz = "failed"
+	if i == 9:
+		graph_check(stage)
 	return xyz
 
 def ort_callback(msg):
