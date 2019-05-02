@@ -25,6 +25,7 @@ class poseClass():
 		self.xyz_list = [0]*10
 		self.grad_cont = True
 		self.T_vector = [0,0,1]
+		self.T_rot = [0,0,1]
 		self.b_vector = [0,0,1]
 		self.djdx = 0
 		self.djdy = 0
@@ -110,7 +111,6 @@ class poseClass():
 				err_msg = "Gradient Ascent failed on step_calc = " + str(self.step_calc)
 				error_pub.publish(err_msg)
 				break
-
 	def update_step(self):
 		
 		if self.quit_loop == True:
@@ -167,7 +167,14 @@ def crossb(x, y, unit_vector, Lt):
 		b_vector = [b_x, np.sqrt(1-b_x**2-b_z**2), b_z]	
 
 	return np.linalg.norm(np.cross(b_vector, unit_vector))
-
+def T_rotated(T_vector):
+	theta = np.arctan(T_vector[1]/T_vector[0])
+	r = np.sqrt(T_vector[0]**2 + T_vector[1]**2)
+	T_rot = [0,0,0]
+	T_rot[0] = r*np.cos(theta +120*np.pi/180)
+	T_rot[1] = r*np.sin(theta+120*np.pi/180)
+	T_rot[2] = T_vector[2]
+	return T_rot
 def J(x,y, unit_vector, Lt):
 	b_x = (np.sqrt((-6*y**2)+2*(np.sqrt(3)*Lt+3*x)*(-x+np.sqrt(x**2+y**2))))/(np.sqrt(Lt**2))
 	b_z = (Lt-2*np.sqrt(3)*np.sqrt(x**2+y**2))/(np.sqrt(Lt**2))	
@@ -256,7 +263,7 @@ def gradient_ascent(stage, unit_vector, i):
 	djy = 0
 	djx = 0
 
-	r = rospy.Rate(100)
+	r = rospy.Rate(10)
 	print "starting loop"
 	while continue_loop == True and cross > 0.0048:
 		if (pose.T() == past_t) == False:
@@ -279,13 +286,14 @@ def gradient_ascent(stage, unit_vector, i):
 		currentx = new_x
 		currenty = new_y
 		currentz = new_z
+
 		cross = crossb(currentx, currenty, unit_vector, Lt)
 		print step, i, currentx, currenty, currentz
 		#Publishes every cycle of the gradient ascent to get the robot moving while 
 
 
 		#if x is small, then rotate and do gradient ascent again. perhaps in wp_setup
-		if step > 50000:
+		if step > 30000:
 			print "im broken"
 			continue_loop = False
 			rotate = 1
@@ -303,8 +311,9 @@ def gradient_ascent(stage, unit_vector, i):
 		continue_loop = True
 		theta = np.arctan(pose.y/pose.x)
 		r = np.sqrt(pose.x**2 + pose.y**2)
-		currentx = r*np.cos(theta +120)
-		currenty = r*np.sin(theta+120)
+		currentx = r*np.cos(theta +120*np.pi/180)
+		currenty = r*np.sin(theta+120*np.pi/180)
+		unit_vector_rot = T_rotated(unit_vector)
 		# currentx = pose.x*-0.5+pose.y*np.sin(120/180*np.pi)
 		# currenty = -pose.x*np.sin(120/180*np.pi)+pose.y*0.5
 		# currentz = pose.z
@@ -322,11 +331,12 @@ def gradient_ascent(stage, unit_vector, i):
 		djx = 0
 		print "rotated"
 		while continue_loop == True and cross > 0.0048:
+
 			if (pose.T() == past_t) == False:
 				"I broke the loop"
 				continue_loop = False
 				break
-			DJ = pose.calc_dj(currentx, currenty, Lt, unit_vector)
+			DJ = pose.calc_dj(currentx, currenty, Lt, unit_vector_rot)
 			if np.sign(djx) != np.sign (DJ[0]) and step > 0 and abs(currentx) < 0.1:
 				new_x = currentx + djx*alpha
 			else:
@@ -345,15 +355,14 @@ def gradient_ascent(stage, unit_vector, i):
 			cross = crossb(currentx, currenty, unit_vector, Lt)
 			print step, i, currentx, currenty, currentz
 			#if x is small, then rotate and do gradient ascent again. perhaps in wp_setup
-			xyz = [pose1.x, pose1.y, pose1.z, pose2.x, pose2.y, pose2.z, pose3.x, pose3.y, pose3.z, rotate]
-			xyz_msg = Float32MultiArray(data = xyz)
-			ort_pub.publish(xyz_msg)
-			if step > 50000:
+			pose.updateXYZ(currentx, currenty, currentz, Lt)
+			if step > 30000:
 				print "im broken"
 				continue_loop = False
 				failed = True
 				break
 				# return "failed"
+			#r.sleep()
 		if failed == False:
 			pose.updateXYZ(currentx, currenty, currentz, Lt)
 			
@@ -367,7 +376,7 @@ def gradient_ascent(stage, unit_vector, i):
 		pose.quit_loop = True
 		xyz = "failed"
 	# if i == 9:
-	# 	graph_check(stage)
+	graph_check(stage)
 	return xyz
 
 def ort_callback(msg):
