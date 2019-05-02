@@ -366,8 +366,8 @@ def gradient_ascent(stage, unit_vector, i):
 	else:
 		pose.quit_loop = True
 		xyz = "failed"
-	if i == 9:
-		graph_check(stage)
+	# if i == 9:
+	# 	graph_check(stage)
 	return xyz
 
 def ort_callback(msg):
