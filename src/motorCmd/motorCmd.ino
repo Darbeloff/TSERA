@@ -34,7 +34,7 @@ motorClass m3c =  motorClass(10,31,26,27,gearRatio2, EncCntsRev2); //2-1
 
 int vel_or_pos = 1; //position control
 int calibrated = 0;//initially not calibrated
-float epsilon = 0.01;
+float epsilon = 0.08;
 
 
 void command_callback(const std_msgs::Float32MultiArray &setpoint){

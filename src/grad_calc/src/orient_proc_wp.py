@@ -46,7 +46,7 @@ class poseClass():
 			theta = np.arctan(y/x)
 			self.x = r*np.cos(theta-120*np.pi/180)
 			self.y = r*np.sin(theta-120*np.pi/180)
-		self.updateB(x, y, Lt)	
+		self.updateB(self.x, self.y, Lt)	
 
 	def calc_dj(self, X, Y, Lt, T_vector):
 		djdx1 = (2*(np.sqrt (3)*Lt + 3*X)*(-1 + X/np.sqrt (X ** 2 + Y ** 2)) + 6*(-X + np.sqrt (X ** 2 + Y ** 2)))/ (2*np.sqrt (Lt ** 2)*np.sqrt (-6*Y ** 2 + 2*(np.sqrt (3)*Lt + 3*X)*(-X + np.sqrt (X ** 2 + Y ** 2))))
@@ -119,11 +119,12 @@ class poseClass():
 				error_pub.publish(err_msg)
 				break
 	def update_step(self):
-		
+		self.send = False
 		if self.quit_loop == True:
 			#Gradient ascent and rotation didn't work
 			if self.step == self.step_calc-1:
 				self.wait = True
+				self.send = True
 				err_msg = "Robot has reached final calculated step."
 				error_pub.publish(err_msg)
 		elif self.step < 9 and self.xyz_list[self.step+1] != 0: # and self.step_list[self.step+1] == 1:
@@ -389,8 +390,8 @@ def gradient_ascent(stage, unit_vector, i):
 		pose.quit_loop = True
 		xyz = "failed"
 	# if i == 9:
-	if rotate == 1:
-		graph_check(stage, rotate)
+	#if rotate == 1:
+	#	graph_check(stage, rotate)
 	return xyz
 
 def ort_callback(msg):
