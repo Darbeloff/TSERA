@@ -35,11 +35,18 @@ class poseClass():
 		self.wait = True
 		self.rotated = False
 		self.quit_loop = False
-	def updateXYZ(self,x,y,z, Lt):
-		self.x = x
-		self.y = y
-		self.z = z
-		self.updateB(x, y, Lt)
+	def updateXYZ(self,x,y,z, Lt, rotated):
+		if rotated == 0:
+			self.x = x
+			self.y = y
+			self.z = z
+			
+		else:
+			r = np.sqrt(x**2 + y**2)
+			theta = np.arctan(y/x)
+			self.x = r*np.cos(theta-120*np.pi/180)
+			self.y = r*np.sin(theta-120*np.pi/180)
+		self.updateB(x, y, Lt)	
 
 	def calc_dj(self, X, Y, Lt, T_vector):
 		djdx1 = (2*(np.sqrt (3)*Lt + 3*X)*(-1 + X/np.sqrt (X ** 2 + Y ** 2)) + 6*(-X + np.sqrt (X ** 2 + Y ** 2)))/ (2*np.sqrt (Lt ** 2)*np.sqrt (-6*Y ** 2 + 2*(np.sqrt (3)*Lt + 3*X)*(-X + np.sqrt (X ** 2 + Y ** 2))))
@@ -191,7 +198,7 @@ def J(x,y, unit_vector, Lt):
 
 	return J
 
-def graph_check(stage):
+def graph_check(stage, rotate):
 	plt.close('all')
 	if stage == 1:
 		pose = pose1
@@ -200,6 +207,12 @@ def graph_check(stage):
 	else:
 		pose = pose3
 
+
+	if rotate == 1:
+		unit_vector = T_rotated(pose.T())
+	else:
+		unit_vector = pose.T()
+
 	fig = plt.figure(1)
 	x = []
 	y = []
@@ -207,9 +220,10 @@ def graph_check(stage):
 	for m in range(len(pose.j_list)):
 		x.append(pose.j_list[m][0])
 		y.append(pose.j_list[m][1])
-		j.append(J(pose.j_list[m][0],pose.j_list[m][1],pose.T(), Lt))
+		j.append(J(pose.j_list[m][0],pose.j_list[m][1],unit_vector, Lt))
 
 	print x, y, j
+
 
 	ax = fig.gca(projection='3d')
 	X = np.linspace(-11, 11,100)
@@ -218,10 +232,10 @@ def graph_check(stage):
 	Z = np.zeros((len(X), len(Y)))
 	for k in range(len(X)):
 		for m in range(len(Y)):
-			Z[k,m] = J(X[k,m], Y[k,m], pose.T(), Lt)
+			Z[k,m] = J(X[k,m], Y[k,m], unit_vector, Lt)
 	ax.plot3D(x,y,j, 'black', label = "TSERA Path")
 	surf = ax.plot_surface(X,Y,Z,rstride=1, cmap = cm.RdBu, linewidth = 0, antialiased = False)
-	title = "Cost Surface for T = [0.579, 0.579, 0.573]"
+	title = "Cost Surface for T = " + str(unit_vector)
 	ax.text2D(0.05, 0.95, title, transform=ax.transAxes)
 	#ax.title("Cost Surface for T = [0.579, 0.579, 0.573")
 	ax.set_xlabel("X [cm]")
@@ -301,7 +315,7 @@ def gradient_ascent(stage, unit_vector, i):
 			# return "failed"
 		#r.sleep()
 	if continue_loop == True:
-		pose.updateXYZ(currentx, currenty, currentz, Lt)
+		pose.updateXYZ(currentx, currenty, currentz, Lt, rotate)
 
 	elif rotate == 1:
 		#run while loop again by multiplying T, xyz, and b by rotation matrix
@@ -352,10 +366,9 @@ def gradient_ascent(stage, unit_vector, i):
 			currentx = new_x
 			currenty = new_y
 			currentz = new_z
-			cross = crossb(currentx, currenty, unit_vector, Lt)
+			cross = crossb(currentx, currenty, unit_vector_rot, Lt)
 			print step, i, currentx, currenty, currentz
 			#if x is small, then rotate and do gradient ascent again. perhaps in wp_setup
-			pose.updateXYZ(currentx, currenty, currentz, Lt)
 			if step > 30000:
 				print "im broken"
 				continue_loop = False
@@ -364,7 +377,7 @@ def gradient_ascent(stage, unit_vector, i):
 				# return "failed"
 			#r.sleep()
 		if failed == False:
-			pose.updateXYZ(currentx, currenty, currentz, Lt)
+			pose.updateXYZ(currentx, currenty, currentz, Lt, rotate)
 			
 	#publishes message once convergence on final goal
 	if failed == False:
@@ -376,7 +389,8 @@ def gradient_ascent(stage, unit_vector, i):
 		pose.quit_loop = True
 		xyz = "failed"
 	# if i == 9:
-	graph_check(stage)
+	if rotate == 1:
+		graph_check(stage, rotate)
 	return xyz
 
 def ort_callback(msg):
