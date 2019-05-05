@@ -95,6 +95,8 @@ def ik_legs(x,y,z,rotated):
 	print la_L, lb_L, lc_L
 	if rotated == 1:
 		legs = [width(lc_L), width(la_L), width(lb_L)]
+	elif rotated == 2:
+		legs = [width(lb_L),width(lc_L), width(la_L)]
 	else:
 		legs = [width(la_L), width(lb_L), width(lc_L)]
 	return legs

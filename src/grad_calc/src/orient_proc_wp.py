@@ -33,7 +33,7 @@ class poseClass():
 		self.send = False
 		self.step_calc = 0
 		self.wait = True
-		self.rotated = False
+		self.rotated = 0
 		self.quit_loop = False
 	def updateXYZ(self,x,y,z, Lt, rotated):
 		if rotated == 0:
@@ -104,7 +104,11 @@ class poseClass():
 			self.step = 0
 			self.xyz_list = [0]*10
 			self.step_calc = 0
-		theta = np.arcsin(np.linalg.norm(np.cross(self.b_vector,self.T_vector)))
+			self.rotated = 0
+		value = np.linalg.norm(np.cross(self.b_vector,self.T_vector))
+		theta = np.arcsin(min(value, 1))
+		print np.cross(self.b_vector,self.T_vector)
+		print np.linalg.norm(np.cross(self.b_vector,self.T_vector))
 		for i in range(len(self.t_list)):
 			scale = np.sin((theta*(i+1)/10))/np.sin(theta)
 			self.t_list[i] = [self.b_vector[0]+ scale*(self.T_vector[0]-self.b_vector[0]), self.b_vector[1]+ scale*(self.T_vector[1]-self.b_vector[1]), self.b_vector[2]+scale*(self.T_vector[2]-self.b_vector[2])] 
@@ -175,12 +179,15 @@ def crossb(x, y, unit_vector, Lt):
 		b_vector = [b_x, np.sqrt(1-b_x**2-b_z**2), b_z]	
 
 	return np.linalg.norm(np.cross(b_vector, unit_vector))
-def T_rotated(T_vector):
-	theta = np.arctan(T_vector[1]/T_vector[0])
+def T_rotated(T_vector, rotated):
+	if T_vector[0] == 0:
+		theta = 90
+	else:
+		theta = np.arctan(T_vector[1]/T_vector[0])
 	r = np.sqrt(T_vector[0]**2 + T_vector[1]**2)
 	T_rot = [0,0,0]
-	T_rot[0] = r*np.cos(theta +120*np.pi/180)
-	T_rot[1] = r*np.sin(theta+120*np.pi/180)
+	T_rot[0] = r*np.cos(theta+rotated*120*np.pi/180)
+	T_rot[1] = r*np.sin(theta+rotated*120*np.pi/180)
 	T_rot[2] = T_vector[2]
 	return T_rot
 def J(x,y, unit_vector, Lt):
@@ -261,6 +268,8 @@ def gradient_ascent(stage, unit_vector, i):
 		pose = pose2
 	else:
 		pose = pose3
+	if i == 0:
+		pose.rotated = 0
 	
 	continue_loop = True
 	rotate = 0
@@ -277,81 +286,17 @@ def gradient_ascent(stage, unit_vector, i):
 	step = 0
 	djy = 0
 	djx = 0
+	achieved = False
 
 	r = rospy.Rate(10)
 	print "starting loop"
-	while continue_loop == True and cross > 0.0048:
-		if (pose.T() == past_t) == False:
-			print "Vector Changed"
-			continue_loop = False
-			break
-		DJ = pose.calc_dj(currentx, currenty, Lt, unit_vector)
-		if np.sign(djx) != np.sign (DJ[0]) and step > 0 and abs(currentx) < 0.1:
-			new_x = currentx + djx*alpha
-		else:
-			new_x = currentx +DJ[0]*alpha
-			djx = DJ[0]
-		if np.sign(djy) != np.sign(DJ[1]) and step > 0 and abs(currenty) < 0.1:
-			new_y = currenty + djy*alpha
-		else:
-	 		new_y = currenty + DJ[1]*alpha 
-	 		djy = DJ[1]
-	 	new_z = currentz
-		step += 1
-		currentx = new_x
-		currenty = new_y
-		currentz = new_z
-
-		cross = crossb(currentx, currenty, unit_vector, Lt)
-		print step, i, currentx, currenty, currentz
-		#Publishes every cycle of the gradient ascent to get the robot moving while 
-
-
-		#if x is small, then rotate and do gradient ascent again. perhaps in wp_setup
-		if step > 30000:
-			print "im broken"
-			continue_loop = False
-			rotate = 1
-			break
-			# return "failed"
-		#r.sleep()
-	if continue_loop == True:
-		pose.updateXYZ(currentx, currenty, currentz, Lt, rotate)
-
-	elif rotate == 1:
-		#run while loop again by multiplying T, xyz, and b by rotation matrix
-		#send xyz with a 1 at the end of the list for rotation 
-		#if close to 0, rotation will still be in the small radius near 0
-		print step, i, pose.x, pose.y, pose.z, "before rotation"
-		continue_loop = True
-		theta = np.arctan(pose.y/pose.x)
-		r = np.sqrt(pose.x**2 + pose.y**2)
-		currentx = r*np.cos(theta +120*np.pi/180)
-		currenty = r*np.sin(theta+120*np.pi/180)
-		unit_vector_rot = T_rotated(unit_vector)
-		# currentx = pose.x*-0.5+pose.y*np.sin(120/180*np.pi)
-		# currenty = -pose.x*np.sin(120/180*np.pi)+pose.y*0.5
-		# currentz = pose.z
-		print step, i, currentx, currenty, currentz, "after rotation"
-		#need to rotate T
-		#need to check if x, y, and z rotation correct
-		new_x = 1
-		new_y = 1
-		new_z = 1
-		alpha = 0.1
-		past_t = pose.T()[:]
-		cross = 1
-		step = 0
-		djy = 0
-		djx = 0
-		print "rotated"
+	if pose.rotated == 0:
 		while continue_loop == True and cross > 0.0048:
-
 			if (pose.T() == past_t) == False:
-				"I broke the loop"
+				print "Vector Changed"
 				continue_loop = False
 				break
-			DJ = pose.calc_dj(currentx, currenty, Lt, unit_vector_rot)
+			DJ = pose.calc_dj(currentx, currenty, Lt, unit_vector)
 			if np.sign(djx) != np.sign (DJ[0]) and step > 0 and abs(currentx) < 0.1:
 				new_x = currentx + djx*alpha
 			else:
@@ -367,19 +312,107 @@ def gradient_ascent(stage, unit_vector, i):
 			currentx = new_x
 			currenty = new_y
 			currentz = new_z
-			cross = crossb(currentx, currenty, unit_vector_rot, Lt)
+
+			cross = crossb(currentx, currenty, unit_vector, Lt)
 			print step, i, currentx, currenty, currentz
+			#Publishes every cycle of the gradient ascent to get the robot moving while 
+
+
 			#if x is small, then rotate and do gradient ascent again. perhaps in wp_setup
-			if step > 30000:
+			if step > 20000 and i > 0:
 				print "im broken"
 				continue_loop = False
-				failed = True
+				rotate = 1
+				pose.rotated = 1
 				break
-				# return "failed"
+				
+			elif step > 20000 and i == 0:
+				print "first point didn't converge"
+
+				continue_loop = False
+				break
 			#r.sleep()
-		if failed == False:
+		if continue_loop == True:
 			pose.updateXYZ(currentx, currenty, currentz, Lt, rotate)
-			
+
+	elif pose.rotated > 0:
+		count = 0
+		while count < 3 and achieved == False:
+		#run while loop again by multiplying T, xyz, and b by rotation matrix
+		#send xyz with a 1 at the end of the list for rotation 
+		#if close to 0, rotation will still be in the small radius near 0
+			print step, i, pose.x, pose.y, pose.z, "before rotation"
+			continue_loop = True
+			failed = False
+			if pose.x == 0:
+				theta = 0
+			else:
+				theta = np.arctan(pose.y/pose.x)
+			r = np.sqrt(pose.x**2 + pose.y**2)
+			currentx = r*np.cos(theta +pose.rotated*120*np.pi/180)
+			currenty = r*np.sin(theta+pose.rotated*120*np.pi/180)
+			unit_vector_rot = T_rotated(unit_vector, pose.rotated)
+			# currentx = pose.x*-0.5+pose.y*np.sin(120/180*np.pi)
+			# currenty = -pose.x*np.sin(120/180*np.pi)+pose.y*0.5
+			# currentz = pose.z
+			print step, i, currentx, currenty, currentz, "after rotation"
+			#need to rotate T
+			#need to check if x, y, and z rotation correct
+			new_x = 1
+			new_y = 1
+			new_z = 1
+			alpha = 1
+			past_t = pose.T()[:]
+			cross = 1
+			step = 0
+			djy = 0
+			djx = 0
+			print "rotated"
+			while continue_loop == True and cross > 0.0048:
+
+				if (pose.T() == past_t) == False:
+					"I broke the loop"
+					continue_loop = False
+					break
+				DJ = pose.calc_dj(currentx, currenty, Lt, unit_vector_rot)
+				if np.sign(djx) != np.sign (DJ[0]) and step > 0 and abs(currentx) < 0.1:
+					new_x = currentx + djx*alpha
+				else:
+					new_x = currentx +DJ[0]*alpha
+					djx = DJ[0]
+				if np.sign(djy) != np.sign(DJ[1]) and step > 0 and abs(currenty) < 0.1:
+					new_y = currenty + djy*alpha
+				else:
+			 		new_y = currenty + DJ[1]*alpha 
+			 		djy = DJ[1]
+			 	new_z = currentz
+				step += 1
+				currentx = new_x
+				currenty = new_y
+				currentz = new_z
+				cross = crossb(currentx, currenty, unit_vector_rot, Lt)
+				print step, i, currentx, currenty, currentz, pose.rotated
+				#if x is small, then rotate and do gradient ascent again. perhaps in wp_setup
+				if step > 30000:
+					print "im broken"
+					continue_loop = False
+					failed = True
+					achieved = False
+					if pose.rotated == 2 and count == 0:
+						pose.rotated -= 1
+					elif pose.rotated == 1 and count == 1:
+						pose.rotated -= 1
+					elif pose.rotated == 1 and count == 0:
+						pose.rotated += 1
+					else:
+						pose.rotated = 0
+					break
+			if failed == False:
+				achieved = True
+			count += 1
+					# return "failed"
+				#r.sleep()
+				
 	#publishes message once convergence on final goal
 	if failed == False:
 		xyz = [pose1.x, pose1.y, pose1.z, pose1.rotated, pose2.x, pose2.y, pose2.z, pose2.rotated, pose3.x, pose3.y, pose3.z, pose3.rotated]
