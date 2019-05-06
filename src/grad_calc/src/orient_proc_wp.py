@@ -337,7 +337,8 @@ def gradient_ascent(stage, unit_vector, i):
 
 	elif pose.rotated > 0:
 		count = 0
-		while count < 3 and achieved == False:
+		count_loop = 0
+		while count < 4 and count_loop < 2 and achieved == False:
 		#run while loop again by multiplying T, xyz, and b by rotation matrix
 		#send xyz with a 1 at the end of the list for rotation 
 		#if close to 0, rotation will still be in the small radius near 0
@@ -398,14 +399,18 @@ def gradient_ascent(stage, unit_vector, i):
 					continue_loop = False
 					failed = True
 					achieved = False
-					if pose.rotated == 2 and count == 0:
-						pose.rotated -= 1
-					elif pose.rotated == 1 and count == 1:
-						pose.rotated -= 1
-					elif pose.rotated == 1 and count == 0:
-						pose.rotated += 1
-					else:
-						pose.rotated = 0
+					pose.rotated += 1
+					# if pose.rotated < 3:
+					# 	if count == 0:
+					# 		pose.rotated += -1**(pose.rotated)*-1
+					# 	elif count == 1:
+					# 		pose.rotated = 0
+					# 	elif count == 2:
+					# 		pose.rotated = 3
+					# else:
+					# 	pose.rotated = 1
+					# 	count = -1
+					# 	count_loop += 1
 					break
 			if failed == False:
 				achieved = True
@@ -414,14 +419,14 @@ def gradient_ascent(stage, unit_vector, i):
 				#r.sleep()
 				
 	#publishes message once convergence on final goal
-	if failed == False:
-		xyz = [pose1.x, pose1.y, pose1.z, pose1.rotated, pose2.x, pose2.y, pose2.z, pose2.rotated, pose3.x, pose3.y, pose3.z, pose3.rotated]
-		if i == 0 or pose.send == True:
-			xyz_msg = Float32MultiArray(data = xyz)
-			ort_pub.publish(xyz_msg)
-	else:
-		pose.quit_loop = True
-		xyz = "failed"
+	# if failed == False:
+	xyz = [pose1.x, pose1.y, pose1.z, pose1.rotated, pose2.x, pose2.y, pose2.z, pose2.rotated, pose3.x, pose3.y, pose3.z, pose3.rotated]
+	if i == 0 or pose.send == True:
+		xyz_msg = Float32MultiArray(data = xyz)
+		ort_pub.publish(xyz_msg)
+	# else:
+	# 	pose.quit_loop = True
+	# 	xyz = "failed"
 	# if i == 9:
 	#if rotate == 1:
 	#	graph_check(stage, rotate)
