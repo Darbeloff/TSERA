@@ -287,6 +287,7 @@ def gradient_ascent(stage, unit_vector, i):
 	djy = 0
 	djx = 0
 	achieved = False
+	count_switch = 0
 
 	r = rospy.Rate(10)
 	print "starting loop"
@@ -299,11 +300,13 @@ def gradient_ascent(stage, unit_vector, i):
 			DJ = pose.calc_dj(currentx, currenty, Lt, unit_vector)
 			if np.sign(djx) != np.sign (DJ[0]) and step > 0 and abs(currentx) < 0.1:
 				new_x = currentx + djx*alpha
+				count_switch += 1
 			else:
 				new_x = currentx +DJ[0]*alpha
 				djx = DJ[0]
 			if np.sign(djy) != np.sign(DJ[1]) and step > 0 and abs(currenty) < 0.1:
 				new_y = currenty + djy*alpha
+				count_switch += 1
 			else:
 		 		new_y = currenty + DJ[1]*alpha 
 		 		djy = DJ[1]
@@ -319,14 +322,14 @@ def gradient_ascent(stage, unit_vector, i):
 
 
 			#if x is small, then rotate and do gradient ascent again. perhaps in wp_setup
-			if step > 20000 and i > 0:
+			if (step > 20000 or count_switch > 20) and i > 0:
 				print "im broken"
 				continue_loop = False
 				rotate = 1
 				pose.rotated = 1
 				break
 				
-			elif step > 20000 and i == 0:
+			elif (step > 20000 or count_switch > 20) and i == 0:
 				print "first point didn't converge"
 
 				continue_loop = False
@@ -338,6 +341,7 @@ def gradient_ascent(stage, unit_vector, i):
 	elif pose.rotated > 0:
 		count = 0
 		count_loop = 0
+
 		while count < 4 and count_loop < 2 and achieved == False:
 		#run while loop again by multiplying T, xyz, and b by rotation matrix
 		#send xyz with a 1 at the end of the list for rotation 
@@ -368,6 +372,7 @@ def gradient_ascent(stage, unit_vector, i):
 			step = 0
 			djy = 0
 			djx = 0
+			count_switch = 0
 			print "rotated"
 			while continue_loop == True and cross > 0.0048:
 
@@ -378,11 +383,13 @@ def gradient_ascent(stage, unit_vector, i):
 				DJ = pose.calc_dj(currentx, currenty, Lt, unit_vector_rot)
 				if np.sign(djx) != np.sign (DJ[0]) and step > 0 and abs(currentx) < 0.1:
 					new_x = currentx + djx*alpha
+					count_switch += 1
 				else:
 					new_x = currentx +DJ[0]*alpha
 					djx = DJ[0]
 				if np.sign(djy) != np.sign(DJ[1]) and step > 0 and abs(currenty) < 0.1:
 					new_y = currenty + djy*alpha
+					count_switch += 1
 				else:
 			 		new_y = currenty + DJ[1]*alpha 
 			 		djy = DJ[1]
@@ -394,7 +401,7 @@ def gradient_ascent(stage, unit_vector, i):
 				cross = crossb(currentx, currenty, unit_vector_rot, Lt)
 				print step, i, currentx, currenty, currentz, pose.rotated
 				#if x is small, then rotate and do gradient ascent again. perhaps in wp_setup
-				if step > 30000:
+				if step > 30000 or count_switch > 20:
 					print "im broken"
 					continue_loop = False
 					failed = True
