@@ -20,9 +20,10 @@ class poseClass():
 		self.z = 120
 		self.b_list = []
 		self.j_list = []
-		self.t_list = [0]*10
-		self.t_xyz_list = [0]*10
-		self.xyz_list = [0]*10
+		self.t_list = [0]*5
+		self.t_xyz_list = [0]*5
+		self.xyz_grad_list = [0]*5
+		self.xyz_send_list = [0]*5
 		self.grad_cont = True
 		self.T_vector = [0,0,1]
 		self.T_rot = [0,0,1]
@@ -36,16 +37,16 @@ class poseClass():
 		self.rotated = 0
 		self.quit_loop = False
 	def updateXYZ(self,x,y,z, Lt, rotated):
-		if rotated == 0:
-			self.x = x
-			self.y = y
-			self.z = z
+		# if rotated == 0:
+		self.x = x
+		self.y = y
+		self.z = z
 			
-		else:
-			r = np.sqrt(x**2 + y**2)
-			theta = np.arctan(y/x)
-			self.x = r*np.cos(theta-120*np.pi/180)
-			self.y = r*np.sin(theta-120*np.pi/180)
+		# else:
+		# 	r = np.sqrt(x**2 + y**2)
+		# 	theta = np.arctan(y/x)
+		# 	self.x = r*np.cos(theta-rotated*120*np.pi/180)
+		# 	self.y = r*np.sin(theta-rotated*120*np.pi/180)
 		self.updateB(self.x, self.y, Lt)	
 
 	def calc_dj(self, X, Y, Lt, T_vector):
@@ -100,9 +101,10 @@ class poseClass():
 		if len(self.b_list) > 0 or len(self.j_list) > 0:
 			# del self.b_list[:]
 			# del self.j_list[:]
-			self.t_list = [0]*10
+			self.t_list = [0]*5
 			self.step = 0
-			self.xyz_list = [0]*10
+			self.xyz_grad_list = [0]*5
+			self.xyz_send_list = [0]*5
 			self.step_calc = 0
 			self.rotated = 0
 		value = np.linalg.norm(np.cross(self.b_vector,self.T_vector))
@@ -110,10 +112,11 @@ class poseClass():
 		print np.cross(self.b_vector,self.T_vector)
 		print np.linalg.norm(np.cross(self.b_vector,self.T_vector))
 		for i in range(len(self.t_list)):
-			scale = np.sin((theta*(i+1)/10))/np.sin(theta)
+			scale = np.sin((theta*(i+1)/5))/np.sin(theta)
 			self.t_list[i] = [self.b_vector[0]+ scale*(self.T_vector[0]-self.b_vector[0]), self.b_vector[1]+ scale*(self.T_vector[1]-self.b_vector[1]), self.b_vector[2]+scale*(self.T_vector[2]-self.b_vector[2])] 
-			xyz = gradient_ascent(self.stage, self.t_list[i], i)
-			self.xyz_list[i] = xyz
+			xyz_grad, xyz_send = gradient_ascent(self.stage, self.t_list[i], i)
+			self.xyz_grad_list[i] = xyz_grad
+			self.xyz_send_list[i] = xyz_send
 			self.step_calc += 1
 			if self.T_vector != vector:
 				self.wait = True
@@ -131,11 +134,11 @@ class poseClass():
 				self.send = True
 				err_msg = "Robot has reached final calculated step."
 				error_pub.publish(err_msg)
-		elif self.step < 9 and self.xyz_list[self.step+1] != 0: # and self.step_list[self.step+1] == 1:
+		elif self.step < 4 and self.xyz_send_list[self.step+1] != 0: # and self.step_list[self.step+1] == 1:
 			self.step += 1
-			if self.xyz_list[self.step] != "failed":
+			if self.xyz_send_list[self.step] != "failed":
 				print self.step
-				xyz = self.xyz_list[self.step]
+				xyz = self.xyz_send_list[self.step]
 				xyz_msg = Float32MultiArray(data = xyz)
 				ort_pub.publish(xyz_msg)
 			else:
@@ -183,7 +186,7 @@ def T_rotated(T_vector, rotated):
 	if T_vector[0] == 0:
 		theta = 90
 	else:
-		theta = np.arctan(T_vector[1]/T_vector[0])
+		theta = np.arctan2(T_vector[1],T_vector[0])
 	r = np.sqrt(T_vector[0]**2 + T_vector[1]**2)
 	T_rot = [0,0,0]
 	T_rot[0] = r*np.cos(theta+rotated*120*np.pi/180)
@@ -216,8 +219,8 @@ def graph_check(stage, rotate):
 		pose = pose3
 
 
-	if rotate == 1:
-		unit_vector = T_rotated(pose.T())
+	if rotate != 0:
+		unit_vector = T_rotated(pose.T(), rotate)
 	else:
 		unit_vector = pose.T()
 
@@ -226,9 +229,14 @@ def graph_check(stage, rotate):
 	y = []
 	j = []
 	for m in range(len(pose.j_list)):
-		x.append(pose.j_list[m][0])
-		y.append(pose.j_list[m][1])
-		j.append(J(pose.j_list[m][0],pose.j_list[m][1],unit_vector, Lt))
+		r = np.sqrt(pose.j_list[m][0]**2 + pose.j_list[m][1]**2)
+		theta = np.arctan(pose.j_list[m][1]/pose.j_list[m][0])
+
+		ex = r*np.cos(theta + rotate*120*np.pi/180)
+		ey = r*np.sin(theta + rotate*120*np.pi/180)
+		x.append(ex)
+		y.append(ey)
+		j.append(J(ex,ey,unit_vector, Lt))
 
 	print x, y, j
 
@@ -289,7 +297,7 @@ def gradient_ascent(stage, unit_vector, i):
 	achieved = False
 	count_switch = 0
 
-	r = rospy.Rate(10)
+	r = rospy.Rate(100)
 	print "starting loop"
 	if pose.rotated == 0:
 		while continue_loop == True and cross > 0.0048:
@@ -298,18 +306,21 @@ def gradient_ascent(stage, unit_vector, i):
 				continue_loop = False
 				break
 			DJ = pose.calc_dj(currentx, currenty, Lt, unit_vector)
-			if np.sign(djx) != np.sign (DJ[0]) and step > 0 and abs(currentx) < 0.1:
-				new_x = currentx + djx*alpha
+			# if np.sign(djx) != np.sign(DJ[0]) and step > 0 and abs(currentx) < 0.1:
+			# 	new_x = currentx + djx*alpha
+			# 	count_switch += 1
+			# else:
+			if np.sign(djx) != np.sign(DJ[0]) and step > 0:
 				count_switch += 1
-			else:
-				new_x = currentx +DJ[0]*alpha
-				djx = DJ[0]
+			new_x = currentx +DJ[0]*alpha
+			djx = DJ[0]
 			if np.sign(djy) != np.sign(DJ[1]) and step > 0 and abs(currenty) < 0.1:
 				new_y = currenty + djy*alpha
 				count_switch += 1
-			else:
-		 		new_y = currenty + DJ[1]*alpha 
-		 		djy = DJ[1]
+			if np.sign(djy) != np.sign(DJ[1]) and step > 0:
+				count_switch += 1
+		 	new_y = currenty + DJ[1]*alpha 
+		 	djy = DJ[1]
 		 	new_z = currentz
 			step += 1
 			currentx = new_x
@@ -317,16 +328,18 @@ def gradient_ascent(stage, unit_vector, i):
 			currentz = new_z
 
 			cross = crossb(currentx, currenty, unit_vector, Lt)
-			print step, i, currentx, currenty, currentz
+			print step, i, currentx, DJ[0], currenty, DJ[1], count_switch
 			#Publishes every cycle of the gradient ascent to get the robot moving while 
 
 
 			#if x is small, then rotate and do gradient ascent again. perhaps in wp_setup
 			if (step > 20000 or count_switch > 20) and i > 0:
+			# if step > 20000 and i > 0:
 				print "im broken"
 				continue_loop = False
 				rotate = 1
 				pose.rotated = 1
+				print step, count_switch, i
 				break
 				
 			elif (step > 20000 or count_switch > 20) and i == 0:
@@ -338,7 +351,7 @@ def gradient_ascent(stage, unit_vector, i):
 		if continue_loop == True:
 			pose.updateXYZ(currentx, currenty, currentz, Lt, rotate)
 
-	elif pose.rotated > 0:
+	if pose.rotated > 0:
 		count = 0
 		count_loop = 0
 
@@ -352,9 +365,10 @@ def gradient_ascent(stage, unit_vector, i):
 			if pose.x == 0:
 				theta = 0
 			else:
-				theta = np.arctan(pose.y/pose.x)
+				theta = np.arctan2(pose.y,pose.x)
 			r = np.sqrt(pose.x**2 + pose.y**2)
-			currentx = r*np.cos(theta +pose.rotated*120*np.pi/180)
+			print theta, r, pose.rotated
+			currentx = r*np.cos(theta+pose.rotated*120*np.pi/180)
 			currenty = r*np.sin(theta+pose.rotated*120*np.pi/180)
 			unit_vector_rot = T_rotated(unit_vector, pose.rotated)
 			# currentx = pose.x*-0.5+pose.y*np.sin(120/180*np.pi)
@@ -374,6 +388,7 @@ def gradient_ascent(stage, unit_vector, i):
 			djx = 0
 			count_switch = 0
 			print "rotated"
+			r = rospy.Rate(100)
 			while continue_loop == True and cross > 0.0048:
 
 				if (pose.T() == past_t) == False:
@@ -381,17 +396,23 @@ def gradient_ascent(stage, unit_vector, i):
 					continue_loop = False
 					break
 				DJ = pose.calc_dj(currentx, currenty, Lt, unit_vector_rot)
-				if np.sign(djx) != np.sign (DJ[0]) and step > 0 and abs(currentx) < 0.1:
-					new_x = currentx + djx*alpha
+				# if np.sign(djx) != np.sign (DJ[0]) and step > 0 and abs(currentx) < 0.1:
+				# 	new_x = currentx + djx*alpha
+				# 	count_switch += 1
+				# else:
+				if np.sign(djx) != np.sign (DJ[0]) and step > 0:
 					count_switch += 1
-				else:
-					new_x = currentx +DJ[0]*alpha
-					djx = DJ[0]
+				new_x = currentx +DJ[0]*alpha
+				djx = DJ[0]
 				if np.sign(djy) != np.sign(DJ[1]) and step > 0 and abs(currenty) < 0.1:
 					new_y = currenty + djy*alpha
+			 	else:
+			 		new_y = currenty + DJ[1]*alpha
+				# else:
+				if np.sign(djy) != np.sign (DJ[1]) and step > 0:
 					count_switch += 1
-				else:
-			 		new_y = currenty + DJ[1]*alpha 
+ 
+			 	if count_switch < 5:
 			 		djy = DJ[1]
 			 	new_z = currentz
 				step += 1
@@ -419,25 +440,44 @@ def gradient_ascent(stage, unit_vector, i):
 					# 	count = -1
 					# 	count_loop += 1
 					break
+				#r.sleep()
 			if failed == False:
 				achieved = True
 			count += 1
 					# return "failed"
-				#r.sleep()
+				
 				
 	#publishes message once convergence on final goal
-	# if failed == False:
-	xyz = [pose1.x, pose1.y, pose1.z, pose1.rotated, pose2.x, pose2.y, pose2.z, pose2.rotated, pose3.x, pose3.y, pose3.z, pose3.rotated]
-	if i == 0 or pose.send == True:
-		xyz_msg = Float32MultiArray(data = xyz)
+	#if failed == False:
+	theta = np.arctan2(currenty,currentx)
+	if pose.rotated > 0:
+		if pose.x == 0:
+			theta = 0
+		r = np.sqrt(currentx**2 + currenty**2)
+		currentx = r*np.cos(theta-pose.rotated*120*np.pi/180)
+		currenty = r*np.sin(theta-pose.rotated*120*np.pi/180)
+	if failed == False:
+		pose.updateXYZ(currentx, currenty, currentz, Lt, pose.rotated)	
+	xyz_grad = [pose1.x, pose1.y, pose1.z, pose1.rotated, pose2.x, pose2.y, pose2.z, pose2.rotated, pose3.x, pose3.y, pose3.z, pose3.rotated]
+	rotated =0
+	if failed == False:
+		if np.sign(pose.T()[0]) == -1:
+			theta = np.arctan2(currenty,currentx) +np.pi #- 60/180*np.pi	
+			rotated = 0
+		r = np.sqrt(currentx**2 + currenty**2)
+		currentx = r*np.cos(theta-pose.rotated*120*np.pi/180)
+		currenty = r*np.sin(theta-pose.rotated*120*np.pi/180)
+	xyz_send = [pose1.x, pose1.y, pose1.z, pose1.rotated, pose2.x, pose2.y, pose2.z, pose2.rotated, currentx, currenty, pose3.z, rotated]
+	if i == 0 or pose.send == True:	
+		xyz_msg = Float32MultiArray(data = xyz_send)
 		ort_pub.publish(xyz_msg)
 	# else:
 	# 	pose.quit_loop = True
 	# 	xyz = "failed"
 	# if i == 9:
 	#if rotate == 1:
-	#	graph_check(stage, rotate)
-	return xyz
+	#graph_check(stage, pose.rotated)
+	return xyz_grad, xyz_send
 
 def ort_callback(msg):
 	print "ort T received"

@@ -40,11 +40,11 @@ def axes_map(js_sp,ax_max,ax_min):
 def ik_cb(msg):
 	global command
 
-	command1.updateXYZ(msg.data[0], msg.data[1], msg.data[2])
+	command1.updateXYZ(msg.data[0], msg.data[1], msg.data[2],0)
 	command1.updateCommand()
-	command2.updateXYZ(msg.data[3], msg.data[4], msg.data[5])
+	command2.updateXYZ(msg.data[3], msg.data[4], msg.data[5],0)
 	command2.updateCommand()
-	command3.updateXYZ(msg.data[6], msg.data[7], msg.data[8])
+	command3.updateXYZ(msg.data[6], msg.data[7], msg.data[8],0)
 	command3.updateCommand()
 
 	command[0:3] = command1.getCommand()
@@ -69,7 +69,7 @@ def ik_ort_cb(msg):
 	command[0:3] = command1.getCommand()
 	command[3:6] = command2.getCommand()
 	command[6:] = command3.getCommand()
-
+	print command[6:]
 	command_msg = Float32MultiArray(data = command)
 	ik_pub.publish(command_msg)	
 

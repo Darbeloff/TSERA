@@ -81,7 +81,7 @@ def ik_legs(x,y,z,rotated):
 		lb_L = la_L
 		lc_L = la_L
 	elif(abs(y)<0.01):
-		y = 0.01
+		y = 0.01*np.sign(y)
 		k = np.sqrt(-3.0*y**2.0 + (np.sqrt(3)*Lt + 3*x)*(-x + r))
 		M = np.sqrt(2*(r - x)*(np.sqrt(3)*Lt + 3*x) - 6.0*y**2.0)
 		lb_L = L_b(x, y, z, Lt, s0, r, M, k)
@@ -92,13 +92,14 @@ def ik_legs(x,y,z,rotated):
 		M = np.sqrt(2*(r - x)*(np.sqrt(3)*Lt + 3*x) - 6*y**2)
 		lb_L = L_b(x, y, z, Lt, s0, r, M, k)
 		lc_L = L_c(x, y, z, Lt, s0, r, M, k)
-	print la_L, lb_L, lc_L
-	if rotated == 1:
-		legs = [width(lc_L), width(la_L), width(lb_L)]
-	elif rotated == 2:
+	
+	if rotated % 3 == 1:
+	 	legs = [width(lc_L), width(la_L), width(lb_L)]
+	elif rotated % 3 == 2:
 		legs = [width(lb_L),width(lc_L), width(la_L)]
 	else:
 		legs = [width(la_L), width(lb_L), width(lc_L)]
+	print rotated%3
 	return legs
 
 

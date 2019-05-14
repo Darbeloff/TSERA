@@ -35,6 +35,7 @@ motorClass m3c =  motorClass(10,31,26,27,gearRatio2, EncCntsRev2); //2-1
 int vel_or_pos = 1; //position control
 int calibrated = 0;//initially not calibrated
 float epsilon = 0.08;
+int testing_count = 0;
 
 
 void command_callback(const std_msgs::Float32MultiArray &setpoint){
@@ -50,6 +51,8 @@ void command_callback(const std_msgs::Float32MultiArray &setpoint){
     m3a.setMotorPos(setpoint.data[6]);
     m3b.setMotorPos(setpoint.data[7]);
     m3c.setMotorPos(setpoint.data[8]);
+    testing_count = 0;
+    
 }
 
 
@@ -121,8 +124,9 @@ void loop (){
 
 //potentially have it send only once per waypoint?
       if(ROS_switch && Error_switch){ //Error Switch is set to stage 
-        if ((sqrt(pow(m3a.errorPos,2)+ pow(m3b.errorPos,2)+ pow(m3c.errorPos,2)))< epsilon && (sqrt(pow(m3a.errorPos,2)+ pow(m3b.errorPos,2)+ pow(m3c.errorPos,2)))> 0){
+        if ((sqrt(pow(m3a.errorPos,2)+ pow(m3b.errorPos,2)+ pow(m3c.errorPos,2)))< epsilon && (sqrt(pow(m3a.errorPos,2)+ pow(m3b.errorPos,2)+ pow(m3c.errorPos,2)))> 0 && testing_count == 0){
             ready_next.data = true;
+            testing_count = 1;
             error_check.publish( &ready_next );
           }
           

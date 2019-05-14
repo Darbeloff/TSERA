@@ -118,29 +118,29 @@ def command_cb(msg):
 
 		# same as above, X and Y are set by axes 0 and 1, Z is set by axes 3
 		# have to make sure X and Y are within a circle of radius 7
+		if msg.buttons[11] or msg.buttons[9] or msg.buttons[8]:
+			if msg.buttons[11]:
+				command1.updateXYZ(-1*msg.axes[0],msg.axes[1],msg.axes[3])
+				command1.updateCommand_vec()
+				button = 11
 
-		if msg.buttons[11]:
-			command1.updateXYZ(-1*msg.axes[0],msg.axes[1],msg.axes[3])
-			command1.updateCommand_vec()
-			button = 11
+			if msg.buttons[9]:
+				command2.updateXYZ(-1*msg.axes[0],msg.axes[1],msg.axes[3])
+				command2.updateCommand_vec()
+				button = 9
 
-		if msg.buttons[9]:
-			command2.updateXYZ(-1*msg.axes[0],msg.axes[1],msg.axes[3])
-			command2.updateCommand_vec()
-			button = 9
+			if msg.buttons[8]:
+				command3.updateXYZ(-1*msg.axes[0],msg.axes[1],msg.axes[3])
+				command3.updateCommand_vec()
+				button = 8
 
-		if msg.buttons[8]:
-			command3.updateXYZ(-1*msg.axes[0],msg.axes[1],msg.axes[3])
-			command3.updateCommand_vec()
-			button = 8
-
-		command[0:3] = command1.getCommand_vec()
-		command[3:6] = command2.getCommand_vec()
-		command[6:9] = command3.getCommand_vec()
-		command[9] = button
-		print command[6:9]
-		command_msg = Float32MultiArray(data = command)
-		ort_pub.publish(command_msg)
+			command[0:3] = command1.getCommand_vec()
+			command[3:6] = command2.getCommand_vec()
+			command[6:9] = command3.getCommand_vec()
+			command[9] = button
+			print command[6:9]
+			command_msg = Float32MultiArray(data = command)
+			ort_pub.publish(command_msg)
 
 	#elif nav == 2: 
 		# gradient descent
