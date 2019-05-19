@@ -7,6 +7,7 @@ from sensor_msgs.msg import Joy
 
 pos_pub = rospy.Publisher('/des_pos',Float32MultiArray,queue_size = 1)
 ort_pub = rospy.Publisher('/des_ort', Float32MultiArray, queue_size = 1)
+mot_pub = rospy.Publisher('/ik', Float32MultiArray,queue_size = 1)
 
 max_radius = 7
 class commandClass:
@@ -19,6 +20,9 @@ class commandClass:
 		self.command_xyz = [self.x,self.y,self.z]
 		self.command_vec = [self.x, self.y, self.z_vec]
 		self.nav = 0
+		self.motor_a = 0
+		self.motor_b = 0
+		self.motor_c = 0
 	def updateXY(self,x,y,joy_rad):
 		drad = axes_map(joy_rad,max_radius,0)
 		r = np.sqrt(x**2+y**2)
@@ -35,6 +39,11 @@ class commandClass:
 		scale = r_corr/r
 		self.x = scale*x
 		self.y = scale*y
+	def update_motors(self,a, b, c):
+		diff = 55
+		self.motor_a = (a+1)/2*(diff) 
+		self.motor_b = (b+1)/2*(diff) 
+		self.motor_c = (c+1)/2*(diff) 
 	def updateNav(self,nav):
 		self.nav = nav
 	def getNav(self):
@@ -45,6 +54,8 @@ class commandClass:
 	def updateCommand_vec(self):
 		#self.command = ik_legs(self.x,self.y,self.z)
 		self.command_vec = [self.x,self.y,self.z_vec]
+	def getCommand_mot(self):
+		return [self.motor_a, self.motor_b, self.motor_c]
 	def getCommand_xyz(self):
 		return self.command_xyz
 	def getCommand_vec(self):
@@ -142,9 +153,22 @@ def command_cb(msg):
 			command_msg = Float32MultiArray(data = command)
 			ort_pub.publish(command_msg)
 
-	#elif nav == 2: 
-		# gradient descent
+	elif nav == 2: 
+		# Simple Motor Control
+		if msg.buttons[11]:
+			command1.update_motors(-1*msg.axes[0],msg.axes[1],msg.axes[3])
 
+		if msg.buttons[9]:
+			command2.update_motors(-1*msg.axes[0],msg.axes[1],msg.axes[3])
+
+		if msg.buttons[8]:
+			command3.update_motors(-1*msg.axes[0],msg.axes[1],msg.axes[3])
+
+		command[0:3] = command1.getCommand_mot()
+		command[3:6] = command2.getCommand_mot()
+		command[6:9] = command3.getCommand_mot()
+		command_msg = Float32MultiArray(data = command)
+		mot_pub.publish(command_msg)
 
 
 
