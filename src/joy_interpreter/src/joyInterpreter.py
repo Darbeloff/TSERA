@@ -40,7 +40,7 @@ class commandClass:
 		self.x = scale*x
 		self.y = scale*y
 	def update_motors(self,a, b, c):
-		diff = 55
+		diff = 22
 		self.motor_a = (a+1)/2*(diff) 
 		self.motor_b = (b+1)/2*(diff) 
 		self.motor_c = (c+1)/2*(diff) 
@@ -153,22 +153,23 @@ def command_cb(msg):
 			command_msg = Float32MultiArray(data = command)
 			ort_pub.publish(command_msg)
 
-	elif nav == 2: 
+	elif command1.getNav() == 2: 
 		# Simple Motor Control
-		if msg.buttons[11]:
-			command1.update_motors(-1*msg.axes[0],msg.axes[1],msg.axes[3])
+		if msg.buttons[11] or msg.buttons[9] or msg.buttons[8]:
+			if msg.buttons[11]:
+				command1.update_motors(-1*msg.axes[0],msg.axes[1],msg.axes[3])
 
-		if msg.buttons[9]:
-			command2.update_motors(-1*msg.axes[0],msg.axes[1],msg.axes[3])
+			if msg.buttons[9]:
+				command2.update_motors(-1*msg.axes[0],msg.axes[1],msg.axes[3])
 
-		if msg.buttons[8]:
-			command3.update_motors(-1*msg.axes[0],msg.axes[1],msg.axes[3])
+			if msg.buttons[8]:
+				command3.update_motors(-1*msg.axes[0],msg.axes[1],msg.axes[3])
 
-		command[0:3] = command1.getCommand_mot()
-		command[3:6] = command2.getCommand_mot()
-		command[6:9] = command3.getCommand_mot()
-		command_msg = Float32MultiArray(data = command)
-		mot_pub.publish(command_msg)
+			command[0:3] = command1.getCommand_mot()
+			command[3:6] = command2.getCommand_mot()
+			command[6:9] = command3.getCommand_mot()
+			command_msg = Float32MultiArray(data = command)
+			mot_pub.publish(command_msg)
 
 
 
